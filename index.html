@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJAX Career Intelligence System v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07111f;
+  --bg2:#0b1a2e;
+  --panel:rgba(10,25,48,0.92);
+  --panel2:rgba(12,30,58,0.95);
+  --border:rgba(0,180,220,0.18);
+  --border2:rgba(0,180,220,0.35);
+  --cyan:#00c8e8;
+  --cyan2:#0099bb;
+  --cyan-dim:rgba(0,200,232,0.1);
+  --gold:#f5c518;
+  --gold-dim:rgba(245,197,24,0.12);
+  --green:#00e5a0;
+  --green-dim:rgba(0,229,160,0.1);
+  --red:#ff6b6b;
+  --red-dim:rgba(255,107,107,0.1);
+  --text:#cce4f0;
+  --text2:#7a9bb5;
+  --white:#e8f4ff;
+  --mono:'Space Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+  --grid-color:rgba(30,140,210,0.07);
+  --grid-color2:rgba(30,140,210,0.035);
+}
+[data-theme="light"] {
+  --bg:#ddeeff;
+  --bg2:#cce0f5;
+  --panel:rgba(255,255,255,0.92);
+  --panel2:rgba(245,252,255,0.96);
+  --border:rgba(0,90,160,0.15);
+  --border2:rgba(0,90,160,0.32);
+  --cyan:#005f99;
+  --cyan2:#004477;
+  --cyan-dim:rgba(0,95,153,0.08);
+  --gold:#a07000;
+  --gold-dim:rgba(160,112,0,0.1);
+  --green:#006644;
+  --green-dim:rgba(0,102,68,0.1);
+  --red:#bb2222;
+  --red-dim:rgba(187,34,34,0.1);
+  --text:#0f2030;
+  --text2:#3a6080;
+  --white:#071520;
+  --grid-color:rgba(0,80,160,0.08);
+  --grid-color2:rgba(0,80,160,0.04);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+/* BLUEPRINT BACKGROUND */
+body {
+  background-color:var(--bg);
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px),
+    linear-gradient(var(--grid-color2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color2) 1px, transparent 1px);
+  background-size:80px 80px, 80px 80px, 16px 16px, 16px 16px;
+  background-position:0 0, 0 0, 0 0, 0 0;
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.65;
+  min-height:100vh;
+}
+
+/* TOPBAR */
+.topbar{background:var(--panel);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{font-family:var(--mono);font-size:13px;color:var(--cyan);letter-spacing:2px;line-height:1.3;}
+.logo span{color:var(--text2);font-size:10px;display:block;letter-spacing:1px;margin-top:3px;}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.theme-btn{background:var(--panel2);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:20px;cursor:pointer;transition:all .2s;}
+.theme-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.chip{font-family:var(--mono);font-size:10px;padding:5px 11px;border-radius:20px;}
+.chip-cyan{background:var(--cyan-dim);border:1px solid var(--border2);color:var(--cyan);}
+.chip-gold{background:var(--gold-dim);border:1px solid rgba(245,197,24,0.25);color:var(--gold);}
+.chip-green{background:var(--green-dim);border:1px solid rgba(0,229,160,0.25);color:var(--green);}
+
+/* MASTER PROFILE STATUS BAR */
+.profile-bar{background:var(--panel);backdrop-filter:blur(6px);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;gap:14px;font-size:13px;}
+.profile-bar-label{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:1px;}
+.profile-status{font-size:13px;color:var(--text2);flex:1;}
+.profile-status.loaded{color:var(--green);}
+.clear-profile-btn{background:none;border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:4px;cursor:pointer;}
+.clear-profile-btn:hover{border-color:var(--red);color:var(--red);}
+
+/* TABS */
+.tab-bar{background:var(--panel);backdrop-filter:blur(6px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:4px;overflow-x:auto;}
+.tab-bar::-webkit-scrollbar{height:3px;}
+.tab-bar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.tab{background:none;border:none;color:var(--text2);font-family:var(--sans);font-size:14px;font-weight:500;padding:14px 18px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+
+/* CONTENT */
+.content{max-width:920px;margin:0 auto;padding:28px 20px 80px;}
+.section{display:none;}
+.section.active{display:block;}
+.sec-head{margin-bottom:24px;}
+.sec-title{font-size:22px;font-weight:600;color:var(--white);margin-bottom:5px;}
+.sec-sub{font-size:14px;color:var(--text2);}
+
+/* PANELS */
+.panel-box{background:var(--panel);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:14px;padding:22px;}
+.panel-box+.panel-box{margin-top:16px;}
+
+/* FORM ELEMENTS */
+.field-label{font-family:var(--mono);font-size:11px;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.step-num{background:var(--cyan-dim);border:1px solid var(--border2);width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.field-desc{font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6;}
+.field-input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:var(--sans);font-size:15px;padding:11px 15px;resize:vertical;transition:border-color .2s;line-height:1.55;}
+.field-input:focus{outline:none;border-color:var(--cyan);}
+.field-input::placeholder{color:var(--text2);opacity:.55;}
+select.field-input{cursor:pointer;}
+
+/* CHECKBOXES */
+.checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;}
+.check-item{display:flex;align-items:flex-start;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:11px 14px;cursor:pointer;transition:border-color .15s;}
+.check-item:hover{border-color:var(--border2);}
+.check-item input[type=checkbox]{width:16px;height:16px;margin-top:3px;accent-color:var(--cyan);flex-shrink:0;cursor:pointer;}
+.check-item.checked{border-color:var(--cyan);background:var(--cyan-dim);}
+.check-label{font-size:14px;color:var(--text);line-height:1.4;}
+.check-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+
+/* CLEARANCE */
+.clearance-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;margin-bottom:12px;}
+@media(max-width:580px){.clearance-row{grid-template-columns:1fr;}}
+.clearance-toggle{background:var(--green-dim);border:1px solid var(--green);border-radius:9px;padding:11px 14px;display:flex;align-items:center;gap:10px;white-space:nowrap;}
+.clearance-toggle input{accent-color:var(--green);width:16px;height:16px;}
+.clearance-toggle label{font-size:13px;color:var(--green);cursor:pointer;}
+.clearance-note{background:var(--cyan-dim);border:1px solid var(--border2);border-radius:9px;padding:11px 14px;font-size:13px;color:var(--cyan);}
+
+/* SKILLS TABLE */
+.skills-table{width:100%;border-collapse:collapse;margin-top:6px;}
+.skills-table th{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:1px;text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);background:var(--bg2);}
+.skills-table td{padding:8px 10px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle;}
+.skills-table tr:last-child td{border-bottom:none;}
+.skill-level{display:flex;gap:4px;}
+.skill-dot{width:10px;height:10px;border-radius:50%;border:1px solid var(--border2);}
+.skill-dot.filled{background:var(--cyan);}
+.add-skill-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.mini-in{background:var(--bg2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--sans);font-size:14px;padding:8px 11px;flex:1;min-width:140px;}
+.mini-in:focus{outline:none;border-color:var(--cyan);}
+.mini-btn{background:var(--cyan-dim);border:1px solid var(--border2);color:var(--cyan);font-family:var(--mono);font-size:11px;padding:8px 14px;border-radius:7px;cursor:pointer;white-space:nowrap;}
+.mini-btn:hover{background:var(--cyan);color:#000;}
+.rm-btn{background:none;border:none;color:var(--text2);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:4px;}
+.rm-btn:hover{color:var(--red);}
+
+/* SAVE BUTTON */
+.save-btn{background:var(--cyan);color:#000;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:1px;padding:12px 28px;border:none;border-radius:9px;cursor:pointer;transition:all .2s;margin-top:10px;}
+.save-btn:hover{opacity:.85;transform:translateY(-1px);}
+.saved-badge{display:none;background:var(--green-dim);border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:6px;margin-left:12px;}
+.saved-badge.show{display:inline-block;}
+
+/* ── AGENT CARDS (integrated) ── */
+.agent-list{display:flex;flex-direction:column;gap:14px;}
+.agent-card{background:var(--panel);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.agent-header{display:flex;align-items:center;gap:14px;padding:17px 20px;cursor:pointer;transition:background .15s;}
+.agent-header:hover{background:var(--cyan-dim);}
+.agent-num{background:var(--cyan-dim);border:1px solid var(--border2);color:var(--cyan);font-family:var(--mono);font-size:12px;font-weight:700;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.agent-meta{flex:1;}
+.agent-name{font-size:16px;font-weight:600;color:var(--white);}
+.agent-tagline{font-size:13px;color:var(--text2);margin-top:2px;}
+.agent-freq{font-family:var(--mono);font-size:10px;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(245,197,24,0.2);padding:3px 9px;border-radius:4px;white-space:nowrap;}
+.chevron{color:var(--text2);font-size:12px;}
+.agent-body{display:none;border-top:1px solid var(--border);}
+.agent-body.open{display:block;}
+
+/* AGENT RUN PANEL */
+.run-panel{padding:20px;}
+.run-panel-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:640px){.run-panel-cols{grid-template-columns:1fr;}}
+.run-label{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:1px;margin-bottom:6px;}
+.run-input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:var(--sans);font-size:14px;padding:10px 13px;resize:vertical;line-height:1.55;}
+.run-input:focus{outline:none;border-color:var(--cyan);}
+.run-input::placeholder{color:var(--text2);opacity:.55;}
+.run-btn{background:var(--cyan);color:#000;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:1px;padding:12px 22px;border:none;border-radius:9px;cursor:pointer;transition:all .2s;}
+.run-btn:hover{opacity:.85;}
+.run-btn:disabled{opacity:.35;cursor:not-allowed;}
+.run-btn-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.save-output-btn{background:var(--green-dim);border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:11px;padding:10px 16px;border-radius:9px;cursor:pointer;display:none;transition:all .2s;}
+.save-output-btn:hover{background:var(--green);color:#000;}
+.save-output-btn.show{display:inline-block;}
+.copy-output-btn{background:var(--panel2);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:11px;padding:10px 16px;border-radius:9px;cursor:pointer;display:none;transition:all .2s;}
+.copy-output-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.copy-output-btn.show,.copy-output-btn.visible{display:inline-block;}
+.agent-output{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:16px;min-height:80px;font-size:14px;color:var(--text);line-height:1.75;white-space:pre-wrap;word-break:break-word;max-height:440px;overflow-y:auto;}
+.agent-output::-webkit-scrollbar{width:4px;}
+.agent-output::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.output-placeholder{color:var(--text2);font-style:italic;font-size:14px;}
+.agent-loading{color:var(--cyan);font-family:var(--mono);font-size:12px;display:none;margin-bottom:8px;}
+.agent-loading.show{display:block;}
+.tip-box{background:var(--gold-dim);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 20px;font-size:13px;color:var(--text2);}
+.tip-box strong{color:var(--gold);}
+
+/* EXTERNAL AGENT BANNER */
+.external-banner{background:var(--panel2);border:1px solid var(--border2);border-radius:9px;padding:14px 16px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start;}
+.ext-icon{font-size:20px;flex-shrink:0;margin-top:2px;}
+.ext-body{flex:1;}
+.ext-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:4px;}
+.ext-desc{font-size:13px;color:var(--text2);line-height:1.6;}
+.prompt-text{background:var(--bg2);color:var(--text);font-family:var(--mono);font-size:12px;line-height:1.8;padding:14px 16px;white-space:pre-wrap;word-break:break-word;max-height:280px;overflow-y:auto;border-radius:9px;border:1px solid var(--border);margin-top:10px;}
+.prompt-copy-btn{background:var(--panel2);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:11px;padding:5px 13px;border-radius:5px;cursor:pointer;margin-top:8px;transition:all .15s;}
+.prompt-copy-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.prompt-copy-btn.copied{border-color:var(--green);color:var(--green);}
+
+/* PIPELINE */
+.pipeline-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:22px;}
+.stat-card{background:var(--panel);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+.stat-num{font-size:30px;font-weight:700;color:var(--white);font-family:var(--mono);}
+.stat-label{font-size:12px;color:var(--text2);margin-top:4px;}
+.goal-ring{position:relative;width:80px;height:80px;margin:0 auto 8px;}
+.goal-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:8;}
+.ring-prog{fill:none;stroke:var(--cyan);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .5s;}
+.goal-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--mono);font-size:14px;font-weight:700;color:var(--cyan);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.form-row.triple{grid-template-columns:1fr 1fr 1fr;}
+@media(max-width:580px){.form-row,.form-row.triple{grid-template-columns:1fr;}}
+.fl{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:1px;margin-bottom:5px;}
+.fi{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:var(--sans);font-size:14px;padding:10px 13px;}
+.fi:focus{outline:none;border-color:var(--cyan);}
+.add-btn{background:var(--cyan);color:#000;font-family:var(--mono);font-size:11px;font-weight:700;padding:11px 20px;border:none;border-radius:9px;cursor:pointer;margin-top:4px;}
+.app-table{background:var(--panel);backdrop-filter:blur(4px);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.app-table-head{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 80px;gap:8px;padding:10px 16px;background:var(--bg2);font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:1px;}
+.app-row{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 80px;gap:8px;padding:13px 16px;border-top:1px solid var(--border);align-items:center;font-size:14px;}
+.app-row:hover{background:var(--cyan-dim);}
+.stage-badge{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:4px;text-align:center;}
+.s-applied{background:var(--cyan-dim);color:var(--cyan);}
+.s-outreach{background:var(--gold-dim);color:var(--gold);}
+.s-interview{background:var(--green-dim);color:var(--green);}
+.s-offer{background:rgba(0,229,160,0.25);color:var(--green);}
+.s-rejected{background:var(--red-dim);color:var(--red);}
+.del-btn{background:none;border:1px solid var(--border);color:var(--text2);font-size:12px;padding:3px 8px;border-radius:4px;cursor:pointer;}
+.del-btn:hover{border-color:var(--red);color:var(--red);}
+.empty-state{padding:44px;text-align:center;color:var(--text2);font-size:14px;}
+
+/* OUTREACH TAB */
+.gen-btn{background:var(--cyan);color:#000;font-family:var(--mono);font-size:12px;font-weight:700;padding:12px 24px;border:none;border-radius:9px;cursor:pointer;width:100%;margin-top:6px;transition:all .2s;}
+.gen-btn:hover{opacity:.85;}
+.gen-btn:disabled{opacity:.35;cursor:not-allowed;}
+.out-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+@media(max-width:580px){.out-row{grid-template-columns:1fr;}}
+.rule-box{background:var(--cyan-dim);border:1px solid var(--border2);border-radius:9px;padding:13px 16px;margin-top:14px;font-size:14px;color:var(--cyan);}
+
+/* LEARN */
+.learn-grid{display:flex;flex-direction:column;gap:14px;}
+.learn-card{background:var(--panel);backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:14px;padding:22px;}
+.learn-card h3{font-size:15px;font-weight:600;color:var(--white);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.learn-card p,.learn-card li{font-size:14px;color:var(--text2);line-height:1.7;}
+.learn-card ul,.learn-card ol{padding-left:20px;}
+.learn-card li{margin-bottom:6px;}
+.learn-card b{color:var(--text);}
+.bool-item{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:11px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;}
+.bool-platform{font-family:var(--mono);font-size:10px;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(245,197,24,0.15);padding:2px 8px;border-radius:4px;white-space:nowrap;margin-top:2px;}
+.bool-string{font-family:var(--mono);font-size:11px;color:var(--cyan);flex:1;word-break:break-all;line-height:1.6;}
+.bool-copy{background:none;border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:4px;cursor:pointer;flex-shrink:0;margin-top:1px;}
+.bool-copy:hover{border-color:var(--cyan);color:var(--cyan);}
+.bool-copy.copied{border-color:var(--green);color:var(--green);}
+.bool-desc{font-size:12px;color:var(--text2);margin-top:4px;}
+.divider{height:1px;background:var(--border);margin:20px 0;}
+
+/* API KEY BANNER */
+.apikey-banner{background:rgba(245,197,24,0.08);border-bottom:1px solid rgba(245,197,24,0.25);padding:10px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.apikey-banner.hidden{display:none;}
+.apikey-banner-text{font-size:13px;color:var(--gold);flex:1;font-family:var(--mono);}
+.apikey-input{background:var(--bg2);border:1px solid rgba(245,197,24,0.35);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:12px;padding:7px 12px;width:340px;max-width:100%;}
+.apikey-input:focus{outline:none;border-color:var(--gold);}
+.apikey-save-btn{background:var(--gold);color:#000;font-family:var(--mono);font-size:11px;font-weight:700;padding:7px 16px;border:none;border-radius:7px;cursor:pointer;white-space:nowrap;}
+.apikey-save-btn:hover{opacity:.85;}
+.apikey-ok{background:var(--green-dim);border-bottom:1px solid rgba(0,229,160,0.2);padding:8px 24px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--green);font-family:var(--mono);}
+.apikey-warn{background:rgba(204,51,51,0.12);border-bottom:1px solid rgba(204,51,51,0.35);padding:10px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:#ff9999;}
+.apikey-warn.hidden{display:none;}
+.apikey-warn strong{color:#fff;}
+.apikey-change{background:none;border:1px solid rgba(0,229,160,0.3);color:var(--green);font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:4px;cursor:pointer;margin-left:auto;}
+.apikey-change:hover{background:var(--green-dim);}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">AJAX CAREER INTELLIGENCE
+    <span>Integrated Command Center — v3.0</span>
+  </div>
+  <div class="topbar-right">
+    <div class="chip chip-gold">v3 Integrated</div>
+    <div class="chip chip-cyan">GOAL: 20–30 apps/week</div>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+  </div>
+</div>
+
+<!-- CORS WARNING (Google Drive / local file) -->
+<div class="apikey-warn hidden" id="apikey-warn">
+  <span>⛔ This environment blocks API calls (Google Drive / local file). <strong>Host on GitHub Pages</strong> for full functionality — see the Quick Setup Guide below.</span>
+  <a href="https://github.com/new" target="_blank" style="font-family:var(--mono);font-size:11px;color:#fff;background:#cc3333;padding:4px 10px;border-radius:4px;text-decoration:none;white-space:nowrap;">Create GitHub Repo →</a>
+</div>
+
+<!-- API KEY BANNER (shown when no key stored) -->
+<div class="apikey-banner" id="apikey-banner">
+  <span class="apikey-banner-text">⚠ API KEY REQUIRED — agents cannot run without it</span>
+  <input class="apikey-input" id="apikey-input" type="password" placeholder="Paste your Anthropic API key here (sk-ant-...)">
+  <button class="apikey-save-btn" onclick="saveApiKey()">SAVE KEY</button>
+  <a href="https://console.anthropic.com/settings/keys" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--gold);white-space:nowrap;">Get key →</a>
+</div>
+<!-- API KEY OK BAR (shown when key is stored) -->
+<div class="apikey-ok hidden" id="apikey-ok">
+  <span>✓ API KEY CONFIGURED — agents ready to run</span>
+  <button class="apikey-change" onclick="changeApiKey()">Change Key</button>
+</div>
+
+<!-- MASTER PROFILE STATUS BAR -->
+<div class="profile-bar">
+  <span class="profile-bar-label">MASTER PROFILE</span>
+  <span class="profile-status" id="profile-status">Not saved — complete My Profile tab first</span>
+  <button class="clear-profile-btn" onclick="clearMasterProfile()">Clear</button>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <button class="tab active" onclick="showTab('profile')">👤 My Profile</button>
+  <button class="tab" onclick="showTab('agents')">🤖 Agents</button>
+  <button class="tab" onclick="showTab('pipeline')">📋 Pipeline</button>
+  <button class="tab" onclick="showTab('outreach')">✉️ Outreach</button>
+  <button class="tab" onclick="showTab('learn')">🎓 How To Use</button>
+</div>
+
+<div class="content">
+
+<!-- ══════════════════════ PROFILE ══════════════════════ -->
+<div class="section active" id="tab-profile">
+  <div class="sec-head">
+    <div class="sec-title">Your Career Profile</div>
+    <div class="sec-sub">Fill this out once. Save it — every agent pulls from this automatically. No copy-paste needed.</div>
+  </div>
+
+  <div class="panel-box">
+    <div class="field-label"><span class="step-num">1</span>TARGET JOB TITLES</div>
+    <div class="field-desc">List the specific titles you're applying for, one per line.</div>
+    <textarea class="field-input" id="p-titles" rows="4" placeholder="CISO&#10;ISSO&#10;Cyber Program Manager&#10;GRC Director&#10;VP of Cybersecurity"></textarea>
+  </div>
+
+  <div class="panel-box">
+    <div class="field-label"><span class="step-num">2</span>LOCATION & WORK PREFERENCES</div>
+    <div class="field-desc">Select all that apply — agents search for roles matching any checked preference.</div>
+    <div class="checkbox-grid" id="location-checks">
+      <label class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox" value="Local — DFW / Van Alstyne TX (on-site or hybrid)">
+        <div><div class="check-label">Local — DFW / Van Alstyne TX</div><div class="check-sub">On-site or hybrid, within commute</div></div>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox" value="Fully remote — anywhere in the US">
+        <div><div class="check-label">Fully Remote (US)</div><div class="check-sub">No geographic restriction</div></div>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox" value="Remote with light travel (under 25%)">
+        <div><div class="check-label">Remote + Light Travel</div><div class="check-sub">Less than 25% on-site</div></div>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox" value="Open to relocation within Texas">
+        <div><div class="check-label">Relocation — Within Texas</div><div class="check-sub">Austin, Houston, San Antonio, etc.</div></div>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox" value="Open to relocation nationally for the right role">
+        <div><div class="check-label">Relocation — National</div><div class="check-sub">Right role, right offer</div></div>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox" value="Open to OCONUS / overseas if clearance-sponsored">
+        <div><div class="check-label">OCONUS / Overseas</div><div class="check-sub">If clearance sponsored</div></div>
+      </label>
+      <label class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox" value="Location flexible if role offers immediate clearance sponsorship">
+        <div><div class="check-label">Flexible — Clearance Priority</div><div class="check-sub">Location secondary if clearance offered</div></div>
+      </label>
+    </div>
+  </div>
+
+  <div class="panel-box">
+    <div class="field-label"><span class="step-num">3</span>MINIMUM SALARY FLOOR</div>
+    <div class="field-desc">Your absolute minimum. Agents filter out roles below this. Be honest.</div>
+    <input class="field-input" id="p-salary" placeholder="e.g. $160,000" style="margin-bottom:10px;">
+    <input class="field-input" id="p-salary-target" placeholder="Target / ideal salary, e.g. $220,000">
+  </div>
+
+  <div class="panel-box">
+    <div class="field-label"><span class="step-num">4</span>CLEARANCE STATUS</div>
+    <div class="field-desc">The goal is to get in the door. Clearance level grows with experience and sponsorship.</div>
+    <div class="clearance-row">
+      <select class="field-input" id="p-clearance">
+        <option value="">-- Current clearance level --</option>
+        <option value="No current clearance — eligible to obtain">No current clearance — eligible to obtain</option>
+        <option value="Public Trust">Public Trust</option>
+        <option value="Secret">Secret</option>
+        <option value="Top Secret">Top Secret</option>
+        <option value="TS/SCI">TS/SCI</option>
+      </select>
+      <div class="clearance-toggle">
+        <input type="checkbox" id="p-clearance-willing" checked>
+        <label for="p-clearance-willing">Willing to obtain / upgrade</label>
+      </div>
+    </div>
+    <div class="clearance-note">Strategy: Target roles listing clearance as <em>preferred</em>, not required. Ask about sponsorship in every first recruiter call. Getting in is the priority — clearance follows with tenure.</div>
+  </div>
+
+  <div class="panel-box">
+    <div class="field-label"><span class="step-num">5</span>CREDENTIALS & EXPERIENCE</div>
+    <div class="field-desc">Certifications, education, years of experience. Feeds into every resume and agent prompt.</div>
+    <textarea class="field-input" id="p-creds" rows="5" placeholder="15+ years in GRC, NIST CSF/RMF/800-53, cloud security, vendor risk, incident response&#10;CompTIA A+&#10;MS in Organizational Leadership&#10;ISACA Member&#10;CISM — in progress&#10;CISSP — pursuing"></textarea>
+  </div>
+
+  <div class="panel-box">
+    <div class="field-label"><span class="step-num">6</span>SKILLS TRUTH TABLE</div>
+    <div class="field-desc">Be honest. Agents will never claim a skill marked "None." This prevents your resume from making promises your interviews can't keep.</div>
+    <table class="skills-table">
+      <thead>
+        <tr>
+          <th style="width:42%">SKILL / AREA</th>
+          <th style="width:30%">PROFICIENCY</th>
+          <th style="width:18%">LEVEL</th>
+          <th style="width:10%"></th>
+        </tr>
+      </thead>
+      <tbody id="skills-tbody"></tbody>
+    </table>
+    <div class="add-skill-row">
+      <input class="mini-in" id="skill-name" placeholder="Add skill (e.g. Splunk, CMMC, Python)">
+      <select class="mini-in" id="skill-level" style="flex:0.6;">
+        <option value="none">None / N/A</option>
+        <option value="familiar">Familiar</option>
+        <option value="practitioner">Practitioner</option>
+        <option value="advanced">Advanced</option>
+        <option value="expert">Expert</option>
+      </select>
+      <button class="mini-btn" onclick="addSkill()">+ Add</button>
+    </div>
+  </div>
+
+  <div class="panel-box">
+    <div class="field-label"><span class="step-num">7</span>18-MONTH CAREER GOAL</div>
+    <div class="field-desc">One or two sentences. Specific beats vague.</div>
+    <textarea class="field-input" id="p-goal" rows="3" placeholder="CISO or Deputy CISO at a major defense contractor within 18-24 months at $200K+, with a path to increasing clearance level through experience and sponsorship."></textarea>
+  </div>
+
+  <div style="margin-top:16px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;">
+    <button class="save-btn" onclick="saveProfile()">SAVE PROFILE</button>
+    <span class="saved-badge" id="saved-badge">✓ SAVED — agents are ready</span>
+  </div>
+  <div class="divider"></div>
+  <div style="font-size:13px;color:var(--text2);">After saving, your profile auto-loads into every agent run. You never paste your background manually again.</div>
+</div>
+
+<!-- ══════════════════════ AGENTS ══════════════════════ -->
+<div class="section" id="tab-agents">
+  <div class="sec-head">
+    <div class="sec-title">Agents</div>
+    <div class="sec-sub">Every agent runs inside this system. Fill in the context for each run — your saved profile loads automatically. Results appear here and can be saved back into the system.</div>
+  </div>
+  <div class="agent-list" id="agent-list"></div>
+</div>
+
+<!-- ══════════════════════ PIPELINE ══════════════════════ -->
+<div class="section" id="tab-pipeline">
+  <div class="sec-head">
+    <div class="sec-title">Application Pipeline</div>
+    <div class="sec-sub">Track every application. Goal: 20–30 targeted apps per week.</div>
+  </div>
+  <div class="pipeline-top" id="pipeline-stats"></div>
+  <div class="panel-box" style="margin-bottom:16px;">
+    <div style="font-size:15px;font-weight:600;color:var(--white);margin-bottom:14px;">Log New Application</div>
+    <div class="form-row">
+      <div><div class="fl">COMPANY</div><input class="fi" id="app-company" placeholder="Lockheed Martin"></div>
+      <div><div class="fl">JOB TITLE</div><input class="fi" id="app-title" placeholder="CISO"></div>
+    </div>
+    <div class="form-row triple">
+      <div><div class="fl">DATE APPLIED</div><input class="fi" id="app-date" type="date"></div>
+      <div><div class="fl">STAGE</div>
+        <select class="fi" id="app-stage">
+          <option value="applied">Applied</option>
+          <option value="outreach">Outreach Sent</option>
+          <option value="interview">Interview</option>
+          <option value="offer">Offer</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <div><div class="fl">SALARY RANGE</div><input class="fi" id="app-salary" placeholder="$180K–$220K"></div>
+    </div>
+    <button class="add-btn" onclick="addApp()">+ ADD APPLICATION</button>
+  </div>
+  <div class="app-table">
+    <div class="app-table-head"><span>COMPANY / ROLE</span><span>SALARY RANGE</span><span>DATE</span><span>STAGE</span><span>ACTION</span></div>
+    <div id="app-rows"><div class="empty-state">No applications logged yet. Add your first one above.</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ OUTREACH ══════════════════════ -->
+<div class="section" id="tab-outreach">
+  <div class="sec-head">
+    <div class="sec-title">Outreach Builder</div>
+    <div class="sec-sub">Generates personalized messages using your saved profile. Results appear instantly — no separate chat needed.</div>
+  </div>
+  <div class="panel-box" style="margin-bottom:14px;">
+    <div style="font-size:15px;font-weight:600;color:var(--white);margin-bottom:16px;">Build Your Message</div>
+    <div class="out-row">
+      <div><div class="fl">COMPANY NAME</div><input class="fi" id="out-company" placeholder="Lockheed Martin"></div>
+      <div><div class="fl">ROLE TITLE</div><input class="fi" id="out-role" placeholder="CISO"></div>
+    </div>
+    <div class="out-row">
+      <div><div class="fl">CONTACT NAME (optional)</div><input class="fi" id="out-contact" placeholder="Jane Smith"></div>
+      <div><div class="fl">MESSAGE TYPE</div>
+        <select class="fi" id="out-type">
+          <option value="linkedin">LinkedIn Connection Note (300 chars)</option>
+          <option value="cold-email">Cold Email to Hiring Manager</option>
+          <option value="recruiter">Recruiter Introduction</option>
+          <option value="followup">Follow-Up (No Response)</option>
+          <option value="thankyou">Thank You After Interview</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div class="fl">SPECIFIC ANGLE TO EMPHASIZE</div>
+      <input class="fi" id="out-angle" placeholder="e.g. NIST RMF experience, clearance eligibility, CMMC 2.0">
+    </div>
+    <button class="gen-btn" id="gen-btn" onclick="generateOutreach()">GENERATE MESSAGE →</button>
+  </div>
+  <div class="panel-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span style="font-size:14px;font-weight:600;color:var(--white);">Generated Message</span>
+      <button class="copy-output-btn visible" id="out-copy-btn" onclick="copyOutreach()">Copy</button>
+    </div>
+    <div class="agent-loading" id="out-loading">Generating your message...</div>
+    <div class="agent-output" id="out-output"><span class="output-placeholder">Fill out the form above and click Generate.</span></div>
+  </div>
+  <div class="rule-box"><strong>48-Hour Rule:</strong> Send outreach within 48 hrs of applying. Response rates drop ~60% after 72 hours.</div>
+</div>
+
+<!-- ══════════════════════ LEARN ══════════════════════ -->
+<div class="section" id="tab-learn">
+  <div class="sec-head">
+    <div class="sec-title">How To Use This System</div>
+    <div class="sec-sub">Weekly rhythm, boolean search strings, clearance strategy, and salary rules.</div>
+  </div>
+  <div class="learn-grid">
+
+    <div class="learn-card">
+      <h3>🗓️ Weekly Rhythm (Mon–Thu)</h3>
+      <ol>
+        <li><b>Monday (30 min):</b> Open Agents tab → run Agent 02 (Job Scout). Review 10–15 scored roles. Flag your picks.</li>
+        <li><b>Mon–Thu (20 min/day):</b> For each flagged role — run Agent 04 (Resume Tailor), paste the JD, get a tailored resume. Then build outreach in the Outreach tab. Apply and log in Pipeline.</li>
+        <li><b>Every 48 hrs:</b> Agent 03 (Email Watch) runs in a separate Claude chat with Gmail connected — it's the one exception.</li>
+        <li><b>Before every interview:</b> Agent 05 (Interview Prep) — paste the JD, select interview type, get 20 Q&amp;A. Practice out loud.</li>
+        <li><b>Thursday (15 min):</b> Agent 07 (Weekly Review) — paste your pipeline stats, get specific adjustments for next week.</li>
+      </ol>
+    </div>
+
+    <div class="learn-card">
+      <h3>🔍 Boolean Search Strings</h3>
+      <p style="margin-bottom:12px;">Copy directly into LinkedIn, ClearanceJobs, USAJobs, or Indeed. One-click copy on each.</p>
+      <div id="bool-list"></div>
+    </div>
+
+    <div class="learn-card">
+      <h3>🔐 Clearance — Get In The Door Strategy</h3>
+      <ul>
+        <li><b>Target "preferred, not required" roles.</b> Sponsors exist — you just have to ask.</li>
+        <li><b>Lead with eligibility.</b> "I'm eligible with no barriers — clean background, US citizen, willing to undergo SF-86."</li>
+        <li><b>First recruiter call question:</b> "Is there budget to sponsor clearance for the right candidate?"</li>
+        <li><b>Clearance builds with tenure.</b> Secret: 3–6 months. TS: 12–18 months. Get in first.</li>
+        <li><b>OCONUS roles often sponsor faster</b> due to mission urgency.</li>
+      </ul>
+    </div>
+
+    <div class="learn-card">
+      <h3>💰 Salary Negotiation Rules</h3>
+      <ul>
+        <li><b>Never give a number first.</b> Ask for the budgeted range instead.</li>
+        <li><b>Your anchor = floor + 15%.</b> Open there, let them counter up.</li>
+        <li><b>Total comp matters.</b> Bonus, equity, clearance sponsorship ($15K–$30K value), training budget.</li>
+        <li><b>Get it in writing</b> before verbal acceptance. Always.</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+// ─── THEME ────────────────────────────────────────────────
+let isDark=true;
+function toggleTheme(){
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'':'light');
+  document.getElementById('theme-btn').textContent=isDark?'☾ Dark':'☀ Light';
+}
+
+// ─── TABS ─────────────────────────────────────────────────
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelector(`[onclick="showTab('${id}')"]`).classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+// ─── LOCATION CHECKBOXES ──────────────────────────────────
+function toggleCheck(label){
+  const cb=label.querySelector('input');
+  setTimeout(()=>label.classList.toggle('checked',cb.checked),0);
+}
+function getLocationPrefs(){
+  return Array.from(document.querySelectorAll('#location-checks input')).filter(c=>c.checked).map(c=>c.value);
+}
+function setLocationPrefs(arr){
+  document.querySelectorAll('#location-checks input').forEach(cb=>{
+    cb.checked=arr.includes(cb.value);
+    cb.closest('label').classList.toggle('checked',cb.checked);
+  });
+}
+
+// ─── SKILLS TABLE ──────────────────────────────────────────
+const DEFAULT_SKILLS=[
+  {name:'Python / Scripting / Coding',level:'none'},
+  {name:'NIST RMF / 800-53',level:'advanced'},
+  {name:'NIST CSF',level:'advanced'},
+  {name:'CMMC 2.0',level:'practitioner'},
+  {name:'Cloud Security (AWS / Azure / GCP)',level:'practitioner'},
+  {name:'Zero Trust Architecture',level:'practitioner'},
+  {name:'Incident Response',level:'advanced'},
+  {name:'Vendor Risk Management',level:'advanced'},
+  {name:'Board / Executive Presentations',level:'practitioner'},
+  {name:'Splunk / SIEM Tools',level:'familiar'},
+];
+let skills=[...DEFAULT_SKILLS];
+const LEVELS={none:'None / N/A',familiar:'Familiar',practitioner:'Practitioner',advanced:'Advanced',expert:'Expert'};
+const DOTS={none:0,familiar:1,practitioner:2,advanced:3,expert:4};
+const LCOL={none:'var(--red)',familiar:'var(--gold)',practitioner:'var(--cyan)',advanced:'var(--cyan)',expert:'var(--green)'};
+
+function renderSkills(){
+  document.getElementById('skills-tbody').innerHTML=skills.map((s,i)=>{
+    const f=DOTS[s.level]||0;
+    const dotsHtml=s.level==='none'
+      ?`<span style="font-family:var(--mono);font-size:11px;color:var(--red);">✗ NOT APPLICABLE</span>`
+      :Array.from({length:4},(_,d)=>`<div class="skill-dot${d<f?' filled':''}"></div>`).join('');
+    return `<tr>
+      <td style="color:var(--text);font-size:14px;">${escHtml(s.name)}</td>
+      <td><div class="skill-level">${dotsHtml}</div></td>
+      <td style="font-size:11px;color:${LCOL[s.level]};font-family:var(--mono);">${LEVELS[s.level]}</td>
+      <td><button class="rm-btn" onclick="removeSkill(${i})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+function addSkill(){
+  const n=document.getElementById('skill-name').value.trim();
+  if(!n)return;
+  skills.push({name:n,level:document.getElementById('skill-level').value});
+  document.getElementById('skill-name').value='';
+  renderSkills();
+}
+function removeSkill(i){skills.splice(i,1);renderSkills();}
+function getSkillsText(){return skills.map(s=>`${s.name}: ${LEVELS[s.level]}`).join(' | ');}
+function getNoneSkills(){return skills.filter(s=>s.level==='none').map(s=>s.name).join(', ')||'None flagged';}
+
+// ─── PROFILE ──────────────────────────────────────────────
+function getProfile(){
+  const locs=getLocationPrefs();
+  return {
+    titles:document.getElementById('p-titles').value.trim()||'[TARGET TITLES — fill profile]',
+    locations:locs.length?locs.join(' | '):'[LOCATIONS — fill profile]',
+    salary:document.getElementById('p-salary').value.trim()||'[MINIMUM SALARY — fill profile]',
+    salaryT:document.getElementById('p-salary-target').value.trim()||'[TARGET SALARY]',
+    clearance:document.getElementById('p-clearance').value||'[CLEARANCE STATUS — fill profile]',
+    clearWilling:document.getElementById('p-clearance-willing').checked,
+    creds:document.getElementById('p-creds').value.trim()||'[CREDENTIALS — fill profile]',
+    skills:getSkillsText(),
+    noSkills:getNoneSkills(),
+    goal:document.getElementById('p-goal').value.trim()||'[CAREER GOAL — fill profile]',
+  };
+}
+function saveProfile(){
+  const p=getProfile();
+  const data={...p,locationArr:getLocationPrefs(),skillsArr:skills,
+    clearWilling:document.getElementById('p-clearance-willing').checked};
+  localStorage.setItem('ajax_profile_v3',JSON.stringify(data));
+  localStorage.setItem('ajax_master_profile',JSON.stringify(p));
+  updateProfileBar();
+  buildAgents();
+  const badge=document.getElementById('saved-badge');
+  badge.classList.add('show');
+  setTimeout(()=>badge.classList.remove('show'),2800);
+}
+function loadProfile(){
+  const raw=localStorage.getItem('ajax_profile_v3');
+  if(!raw)return;
+  const d=JSON.parse(raw);
+  const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined)el.value=v;};
+  set('p-titles',d.titles);set('p-salary',d.salary);set('p-salary-target',d.salaryT);
+  set('p-clearance',d.clearance);set('p-creds',d.creds);set('p-goal',d.goal);
+  if(d.clearWilling!==undefined)document.getElementById('p-clearance-willing').checked=d.clearWilling;
+  if(d.locationArr)setLocationPrefs(d.locationArr);
+  if(d.skillsArr&&d.skillsArr.length)skills=d.skillsArr;
+  renderSkills();
+}
+function getMasterProfile(){
+  const raw=localStorage.getItem('ajax_master_profile');
+  return raw?JSON.parse(raw):null;
+}
+function clearMasterProfile(){
+  if(!confirm('Clear saved profile? You will need to re-save from the Profile tab.'))return;
+  localStorage.removeItem('ajax_master_profile');
+  localStorage.removeItem('ajax_profile_v3');
+  updateProfileBar();
+}
+function updateProfileBar(){
+  const p=getMasterProfile();
+  const el=document.getElementById('profile-status');
+  if(p&&p.titles&&p.titles!=='[TARGET TITLES — fill profile]'){
+    el.textContent=`✓ Loaded — targeting: ${p.titles.split('\n')[0]}${p.titles.split('\n').length>1?' + more':''} | Floor: ${p.salary}`;
+    el.classList.add('loaded');
+  } else {
+    el.textContent='Not saved — complete My Profile tab and click Save Profile';
+    el.classList.remove('loaded');
+  }
+}
+
+// ─── AGENT DEFINITIONS ────────────────────────────────────
+const AGENTS=[
+  {
+    num:'01',name:'Profile Builder',
+    tagline:'Reads your resume text · extracts master career data',
+    freq:'Run once — update quarterly',
+    tip:'Paste the text of up to 3 resumes into the input. After running, click "Save as Master Profile" to store the output so all other agents use it automatically.',
+    isExternal:false,
+    saveLabel:'Save as Master Profile',
+    inputs:[
+      {id:'a01-resumes',label:'PASTE YOUR RESUME TEXT (up to 3 — paste one after another)',type:'textarea',rows:10,placeholder:'Copy and paste your resume text here. If you have multiple resumes, paste them all in sequence with a line between each.'}
+    ],
+    buildPrompt:(ctx,p)=>`You are a career intelligence agent specializing in cybersecurity and defense sector roles.
+
+MY INFORMATION:
+- Target Roles: ${p.titles}
+- Location Preferences: ${p.locations}
+- Minimum Salary: ${p.salary} | Target: ${p.salaryT}
+- Clearance: ${p.clearance} | Willing to obtain/upgrade: ${p.clearWilling?'Yes':'No'}
+- Credentials: ${p.creds}
+- Skills Truth Table: ${p.skills}
+- Skills I do NOT have: ${p.noSkills}
+- Career Goal: ${p.goal}
+
+RESUME TEXT PROVIDED:
+${ctx.a01resumes||'[No resume text provided — analyze my profile information only]'}
+
+YOUR TASKS:
+1. Extract and organize from the resume(s): all job titles, companies, dates, technical skills, frameworks (NIST, CMMC, ISO, FedRAMP), certifications, education, measurable achievements with numbers
+2. Identify my TOP 5 strongest selling points for CISO-track defense roles
+3. Identify 3 gaps or weaknesses with suggestions to address each
+4. Note any inconsistencies across resumes that should be resolved
+5. IMPORTANT: Never suggest or inflate skills listed as "None / N/A" in my truth table
+6. Produce a structured MASTER PROFILE document I can save and reuse
+
+Output the master profile in clearly labeled sections. Be dense, specific, and honest — not vague.`
+  },
+  {
+    num:'02',name:'Job Scout',
+    tagline:'Mon–Thu · 10–15 qualified roles · scores 7+ only',
+    freq:'Run Monday morning',
+    tip:'If fewer than 10 roles score 7+, the agent will explain why and suggest what to relax in the search. Roles requiring skills from your "None" list are flagged automatically.',
+    isExternal:false,
+    inputs:[
+      {id:'a02-notes',label:'ADDITIONAL SEARCH NOTES (optional)',type:'textarea',rows:3,placeholder:'e.g. Focus on remote roles this week. Avoid contract positions. Prioritize Leidos and SAIC. Any specific keywords to add or avoid.'}
+    ],
+    buildPrompt:(ctx,p)=>`You are a job search intelligence agent for a senior cybersecurity professional.
+
+MY PROFILE:
+- Target Roles: ${p.titles}
+- Location Preferences: ${p.locations}
+- Minimum Salary: ${p.salary}
+- Clearance: ${p.clearance} | Willing to obtain/upgrade: ${p.clearWilling?'Yes — flag all sponsorship opportunities':'No'}
+- Key Credentials: ${p.creds}
+- Skills I do NOT have (flag if role requires these): ${p.noSkills}
+- Career Goal: ${p.goal}
+${ctx.a02notes?`\nAdditional notes: ${ctx.a02notes}`:''}
+
+SEARCH SCHEDULE: Monday through Thursday only.
+
+SEARCH SOURCES:
+1. LinkedIn — my target titles at Lockheed Martin, Raytheon/RTX, SAIC, Leidos, Booz Allen Hamilton
+2. ClearanceJobs.com — CISO, ISSO, Cyber PM, GRC Director (prioritize "clearance preferred" not "required")
+3. USAJobs.gov — GS-13/GS-14 cybersecurity, ISSO, RMF roles
+4. Indeed — CISO, VP Cybersecurity, GRC Director matching my location preferences
+
+SCORING RUBRIC (1–10):
+- Title match: 25% | Clearance preferred over required: 20% | Salary above ${p.salary}: 20%
+- Location match: 15% | Company tier: 10% | NIST/CMMC/RMF alignment: 10%
+
+HARD RULES:
+- Surface ONLY roles scoring 7 or higher. Target 10–15 results. Do not pad.
+- Flag ⚠️ any role requiring skills from my "do not have" list: ${p.noSkills}
+- If fewer than 10 score 7+, explain why and suggest what to adjust
+
+OUTPUT per role: Company | Title | Location | Salary Range | Posted Date | Score | APPLY/WATCHLIST | Clearance Sponsorship? | One-line note
+Sort by score descending.`
+  },
+  {
+    num:'03',name:'Email Watch',
+    tagline:'Monitors Gmail for recruiters, interviews, and application status',
+    freq:'Run every 48 hours',
+    tip:'This agent requires your Gmail connector to be active in Claude. It runs in a separate Claude chat tab — it is the one exception to the integrated system.',
+    isExternal:true,
+    inputs:[],
+    buildPrompt:(ctx,p)=>`You are an email monitoring agent. Use my connected Gmail account to scan for job search messages.
+
+MY PROFILE:
+- Applying for: ${p.titles}
+- Target companies: Lockheed Martin, Raytheon, SAIC, Leidos, Booz Allen Hamilton, and other defense/cybersecurity firms
+- Minimum salary: ${p.salary}
+
+TASKS:
+1. Search Gmail for emails from the last 48 hours containing: "opportunity", "your application", "interview", "phone screen", "availability", "recruiter", "hiring manager", "next steps", "offer"
+2. Categorize each relevant email: RECRUITER OUTREACH / INTERVIEW REQUEST / APPLICATION UPDATE / REJECTION / ACTION REQUIRED
+3. For each: sender, company, category, key details, suggested reply approach
+4. Draft a short reply for any INTERVIEW REQUEST or high-priority RECRUITER OUTREACH
+
+RESPONSE RULE: Reply to every recruiter within 24 hours.`
+  },
+  {
+    num:'04',name:'Resume Tailor',
+    tagline:'ATS-optimized · skills-honest · no inflation · per application',
+    freq:'Run once per application',
+    tip:'Paste the complete job description — not just the title. The more text you give it, the higher your ATS keyword match. Save each output as Resume_Company_Role_Date.pdf in Google Drive /AJAX/Resumes/.',
+    isExternal:false,
+    inputs:[
+      {id:'a04-company',label:'COMPANY NAME',type:'input',placeholder:'e.g. Lockheed Martin'},
+      {id:'a04-role',label:'ROLE TITLE',type:'input',placeholder:'e.g. CISO'},
+      {id:'a04-jd',label:'PASTE FULL JOB DESCRIPTION',type:'textarea',rows:10,placeholder:'Paste the complete job description text here — every word matters for ATS keyword matching.'}
+    ],
+    buildPrompt:(ctx,p)=>`You are an expert resume writer specializing in cybersecurity and defense sector roles.
+
+MY MASTER PROFILE:
+- Experience: ${p.creds}
+- Target: ${p.titles}
+- Location Preferences: ${p.locations}
+- Clearance: ${p.clearance} | Willing to obtain: ${p.clearWilling?'Yes':'No'}
+- Career Goal: ${p.goal}
+
+SKILLS TRUTH TABLE:
+${p.skills}
+
+⚠️ SKILLS I DO NOT HAVE — NEVER include or imply these in any resume output: ${p.noSkills}
+This is a hard rule. If the JD requires a skill on this list, flag it as a gap only. Do not reframe it as a transferable or adjacent skill I "could learn."
+
+APPLICATION TARGET:
+- Company: ${ctx.a04company||'[Not specified]'}
+- Role: ${ctx.a04role||'[Not specified]'}
+
+JOB DESCRIPTION:
+${ctx.a04jd||'[No job description provided — provide general senior cybersecurity resume]'}
+
+INSTRUCTIONS:
+1. Analyze the JD for required skills, preferred qualifications, exact keyword phrases, framework requirements
+2. Rewrite my resume to mirror the language of this specific JD — use their exact terminology where truthful
+3. Reorder bullet points to surface the most relevant experience first
+4. Quantify every achievement possible — percentages, dollar amounts, team sizes, timelines
+5. Check every claim against my Skills Truth Table — only include what I can honestly demonstrate
+6. Flag any requirements I clearly don't meet
+
+OUTPUT:
+- Full tailored resume (ready to copy into Word or Google Docs)
+- ATS keyword match score (estimated %)
+- Top 3 selling points for this specific role
+- Honest gap list`
+  },
+  {
+    num:'05',name:'Interview Prep',
+    tagline:'20 Q&A in STAR format · salary script · clearance talking points',
+    freq:'Run when interview is scheduled',
+    tip:'Select the interview type carefully — the Q&A set changes significantly between a phone screen and a technical panel. Practice your top 5 answers out loud before the call.',
+    isExternal:false,
+    inputs:[
+      {id:'a05-company',label:'COMPANY NAME',type:'input',placeholder:'e.g. Raytheon'},
+      {id:'a05-role',label:'ROLE TITLE',type:'input',placeholder:'e.g. Deputy CISO'},
+      {id:'a05-type',label:'INTERVIEW TYPE',type:'select',options:['Phone Screen','Technical Panel','Behavioral / HR','Executive Presentation','CISO Case Study']},
+      {id:'a05-jd',label:'PASTE FULL JOB DESCRIPTION',type:'textarea',rows:8,placeholder:'Paste the complete job description here for role-specific questions.'}
+    ],
+    buildPrompt:(ctx,p)=>`You are an executive interview coach specializing in cybersecurity leadership roles.
+
+MY PROFILE:
+- Experience: ${p.creds}
+- Target Role: ${ctx.a05company||'[Company]'} — ${ctx.a05role||'[Role]'}
+- Career Goal: ${p.goal}
+- Clearance: ${p.clearance} | Willing to obtain: ${p.clearWilling?'Yes':'No'}
+- Salary Floor: ${p.salary} | Target: ${p.salaryT}
+- Skills I do NOT have: ${p.noSkills}
+- Interview Type: ${ctx.a05type||'Phone Screen'}
+
+JOB DESCRIPTION:
+${ctx.a05jd||'[No JD provided — use general senior cybersecurity CISO-track questions]'}
+
+DELIVER:
+1. BEHAVIORAL QUESTIONS (10): Most likely questions with specific STAR-format answers using my actual experience. No generic responses.
+2. TECHNICAL QUESTIONS (5): Role-specific with answers referencing NIST, CMMC, RMF, Zero Trust as appropriate. Do not create answers requiring skills I flagged as not applicable.
+3. EXECUTIVE / STRATEGIC QUESTIONS (5): Leadership and vision questions positioning me as CISO-track.
+4. SALARY NEGOTIATION SCRIPT: What to say when asked first | How to anchor at ${p.salaryT} | Total comp conversation including clearance sponsorship value
+5. CLEARANCE TALKING POINTS: How to address "${p.clearance}" confidently. Framing: getting in is the priority, clearance grows with tenure.
+6. QUESTIONS TO ASK THEM (5): Smart questions that signal strategic thinking.`
+  },
+  {
+    num:'06',name:'Outreach Builder',
+    tagline:'Use the Outreach tab for live generation',
+    freq:'Run per application — within 48 hours',
+    tip:'The Outreach tab at the top generates messages live inside this system using your saved profile. This agent is already integrated — just switch to that tab.',
+    isExternal:false,
+    isAlias:true,
+    inputs:[],
+    buildPrompt:(ctx,p)=>''
+  },
+  {
+    num:'07',name:'Weekly Review',
+    tagline:'Thursday debrief · pipeline health · next week adjustments',
+    freq:'Run every Thursday',
+    tip:'Paste your pipeline numbers when prompted. The more data you provide, the more specific the recommendations. This replaces a vague "how am I doing" gut check with actual analysis.',
+    isExternal:false,
+    inputs:[
+      {id:'a07-stats',label:'PASTE YOUR PIPELINE STATS (from the Pipeline tab)',type:'textarea',rows:5,placeholder:'Example:\nRoles searched this week: 18\nRoles scored 7+: 11\nApplications submitted: 8\nOutreach messages sent: 8\nRecruiter responses received: 2\nInterview requests: 1\nRejections: 1'}
+    ],
+    buildPrompt:(ctx,p)=>`You are a job search performance analyst. Review this week's activity and recommend improvements.
+
+MY PROFILE:
+- Target Roles: ${p.titles}
+- Weekly Goal: 20–30 targeted applications
+- Minimum Score Threshold: 7/10
+
+THIS WEEK'S DATA:
+${ctx.a07stats||'[No stats provided — give general weekly review framework]'}
+
+ANALYZE:
+1. Application volume — on track for 20–30/week goal?
+2. Response rate — what % of applications generated recruiter contact?
+3. Score distribution — are we finding enough 7+ roles?
+4. Outreach effectiveness — are messages generating replies?
+5. Stage conversion — where are applications stalling?
+
+RECOMMEND:
+1. One specific search adjustment for next week
+2. One outreach improvement
+3. Any patterns to flag (companies ghosting, certain role types underperforming)
+4. Next week's top 3 priorities
+
+Keep recommendations specific and actionable. No generic advice.`
+  }
+];
+
+// ─── BUILD AGENT UI ───────────────────────────────────────
+function buildAgents(){
+  const p=getMasterProfile()||getProfile();
+  const c=document.getElementById('agent-list');
+  c.innerHTML=AGENTS.map((a,i)=>{
+    if(a.isAlias){
+      return `<div class="agent-card">
+        <div class="agent-header" onclick="showTab('outreach')">
+          <div class="agent-num">${a.num}</div>
+          <div class="agent-meta"><div class="agent-name">${a.name}</div><div class="agent-tagline">${a.tagline}</div></div>
+          <div class="agent-freq">${a.freq}</div>
+          <div class="chevron">→</div>
+        </div>
+      </div>`;
+    }
+    const inputsHtml=a.isExternal?'':`<div class="run-panel">
+      ${a.inputs.map(inp=>{
+        let el='';
+        if(inp.type==='textarea') el=`<textarea class="run-input" id="${inp.id}" rows="${inp.rows||4}" placeholder="${escHtml(inp.placeholder||'')}"></textarea>`;
+        else if(inp.type==='select') el=`<select class="run-input" id="${inp.id}">${(inp.options||[]).map(o=>`<option>${o}</option>`).join('')}</select>`;
+        else el=`<input class="run-input" id="${inp.id}" placeholder="${escHtml(inp.placeholder||'')}">`;
+        return `<div style="margin-bottom:12px;"><div class="run-label">${inp.label}</div>${el}</div>`;
+      }).join('')}
+      <div class="run-btn-row">
+        <button class="run-btn" id="run-btn-${i}" onclick="runAgent(${i})">RUN AGENT ${a.num} →</button>
+        <button class="save-output-btn" id="save-btn-${i}" onclick="saveMasterFromAgent(${i})" style="display:${a.saveLabel?'none':'none'}">${a.saveLabel||''}</button>
+        <button class="copy-output-btn" id="copy-btn-${i}" onclick="copyAgentOutput(${i})">Copy Output</button>
+      </div>
+      <div class="agent-loading" id="loading-${i}">Running agent... this may take a few seconds</div>
+      <div class="agent-output" id="output-${i}"><span class="output-placeholder">Click "Run Agent ${a.num}" to generate results. ${getMasterProfile()?'✓ Your saved profile will be used automatically.':'⚠ Save your profile first for best results.'}</span></div>
+    </div>`;
+
+    const externalHtml=a.isExternal?`<div class="run-panel">
+      <div class="external-banner">
+        <span class="ext-icon">⚠️</span>
+        <div class="ext-body">
+          <div class="ext-title">Runs in a separate Claude chat — Gmail connector required</div>
+          <div class="ext-desc">Agent 03 reads your actual inbox via the Gmail MCP connector. Open a new Claude chat, enable the Gmail connector in the sidebar, then paste this prompt. This is the only agent that doesn't run inside this system.</div>
+        </div>
+      </div>
+      <div class="run-label">COPY THIS PROMPT → PASTE INTO CLAUDE WITH GMAIL CONNECTED</div>
+      <div class="prompt-text" id="ext-prompt-${i}">${escHtml(a.buildPrompt({},p))}</div>
+      <button class="prompt-copy-btn" id="ext-copy-${i}" onclick="copyExternal(${i})">Copy Prompt</button>
+    </div>`:'';
+
+    return `<div class="agent-card">
+      <div class="agent-header" onclick="toggleAgent(${i})">
+        <div class="agent-num">${a.num}</div>
+        <div class="agent-meta"><div class="agent-name">${a.name}</div><div class="agent-tagline">${a.tagline}</div></div>
+        <div class="agent-freq">${a.freq}</div>
+        <div class="chevron" id="chev-${i}">▼</div>
+      </div>
+      <div class="agent-body" id="body-${i}">
+        ${a.isExternal?externalHtml:inputsHtml}
+        <div class="tip-box"><strong>Pro tip:</strong> ${a.tip}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAgent(i){
+  const body=document.getElementById('body-'+i);
+  const chev=document.getElementById('chev-'+i);
+  if(!body)return;
+  const open=body.classList.toggle('open');
+  chev.textContent=open?'▲':'▼';
+}
+
+// ─── RUN AGENT (API CALL) ─────────────────────────────────
+async function runAgent(i){
+  if(ENV==='local'||ENV==='other'){
+    alert('Agents cannot run from Google Drive or a local file due to browser security restrictions.\n\nSolution: Upload ajax_v3.html to GitHub Pages.\n\nSee the red banner at the top of the page for a direct link to create your repo.');
+    return;
+  }
+  if(ENV==='github'&&!getApiKey()){
+    alert('Please enter your Anthropic API key in the yellow banner at the top first.');return;
+  }
+  const a=AGENTS[i];
+  const p=getMasterProfile()||getProfile();
+  const ctx={};
+  a.inputs.forEach(inp=>{
+    const el=document.getElementById(inp.id);
+    if(el) ctx[inp.id.replace(/-/g,'')]=el.value.trim();
+  });
+
+  const prompt=a.buildPrompt(ctx,p);
+  const runBtn=document.getElementById('run-btn-'+i);
+  const loading=document.getElementById('loading-'+i);
+  const output=document.getElementById('output-'+i);
+  const copyBtn=document.getElementById('copy-btn-'+i);
+  const saveBtn=document.getElementById('save-btn-'+i);
+
+  runBtn.disabled=true;
+  loading.classList.add('show');
+  output.innerHTML='<span class="output-placeholder">Working...</span>';
+  copyBtn.classList.remove('show');
+  if(saveBtn) saveBtn.classList.remove('show');
+
+  try{
+    const data=await callApi(prompt,4000);
+    if(data.error){
+      output.textContent='API Error: '+data.error.message+'\n\nType: '+data.error.type;
+      return;
+    }
+    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    if(!text){output.textContent='Empty response. Raw:\n'+JSON.stringify(data,null,2);return;}
+    output.textContent=text;
+    localStorage.setItem('ajax_agent_output_'+a.num,text);
+    copyBtn.classList.add('show');
+    if(a.saveLabel&&saveBtn) saveBtn.classList.add('show');
+  }catch(e){
+    output.textContent='Network error: '+e.message+'\n\nIf you are on Google Drive or a local file, agents cannot run due to browser security (CORS). Upload to GitHub Pages for full functionality — see the red banner at the top for instructions.';
+  }finally{
+    runBtn.disabled=false;
+    loading.classList.remove('show');
+  }
+}
+
+function copyAgentOutput(i){
+  const text=document.getElementById('output-'+i).textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('copy-btn-'+i);
+    btn.textContent='✓ Copied!';
+    setTimeout(()=>btn.textContent='Copy Output',2000);
+  });
+}
+
+function saveMasterFromAgent(i){
+  const text=document.getElementById('output-'+i).textContent;
+  localStorage.setItem('ajax_master_profile_text',text);
+  const btn=document.getElementById('save-btn-'+i);
+  btn.textContent='✓ Saved as Master Profile';
+  btn.style.background='var(--green)';
+  btn.style.color='#000';
+  updateProfileBar();
+  setTimeout(()=>{btn.textContent='Save as Master Profile';btn.style.background='';btn.style.color='';},3000);
+}
+
+function copyExternal(i){
+  const p=getMasterProfile()||getProfile();
+  const text=AGENTS[i].buildPrompt({},p);
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('ext-copy-'+i);
+    btn.textContent='✓ Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy Prompt';btn.classList.remove('copied');},2000);
+  });
+}
+
+// ─── PIPELINE ─────────────────────────────────────────────
+let apps=JSON.parse(localStorage.getItem('ajax_apps')||'[]');
+function saveApps(){localStorage.setItem('ajax_apps',JSON.stringify(apps));}
+function addApp(){
+  const company=document.getElementById('app-company').value.trim();
+  const title=document.getElementById('app-title').value.trim();
+  if(!company||!title){alert('Please enter company and job title.');return;}
+  apps.unshift({id:Date.now(),company,title,
+    date:document.getElementById('app-date').value||new Date().toISOString().split('T')[0],
+    stage:document.getElementById('app-stage').value,
+    salary:document.getElementById('app-salary').value.trim()});
+  saveApps();
+  ['app-company','app-title','app-salary'].forEach(id=>document.getElementById(id).value='');
+  renderPipeline();
+}
+function deleteApp(id){apps=apps.filter(a=>a.id!==id);saveApps();renderPipeline();}
+function renderPipeline(){
+  const start=new Date();start.setDate(start.getDate()-start.getDay());
+  const wk=apps.filter(a=>new Date(a.date)>=start).length;
+  const goal=25,pct=Math.min(Math.round((wk/goal)*100),100);
+  const circ=2*Math.PI*28,off=circ-(pct/100)*circ;
+  const counts={applied:0,outreach:0,interview:0,offer:0,rejected:0};
+  apps.forEach(a=>{if(counts[a.stage]!==undefined)counts[a.stage]++;});
+  document.getElementById('pipeline-stats').innerHTML=`
+    <div class="stat-card">
+      <div class="goal-ring"><svg width="80" height="80" viewBox="0 0 80 80">
+        <circle class="ring-bg" cx="40" cy="40" r="28"/>
+        <circle class="ring-prog" cx="40" cy="40" r="28" style="stroke-dasharray:${circ.toFixed(1)};stroke-dashoffset:${off.toFixed(1)}"/>
+      </svg><div class="goal-pct">${pct}%</div></div>
+      <div class="stat-label">Week: ${wk}/${goal}</div>
+    </div>
+    <div class="stat-card"><div class="stat-num">${apps.length}</div><div class="stat-label">Total Applied</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--gold)">${counts.outreach}</div><div class="stat-label">Outreach Sent</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${counts.interview}</div><div class="stat-label">Interviews</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--cyan)">${counts.offer}</div><div class="stat-label">Offers</div></div>`;
+  const sc={applied:'s-applied',outreach:'s-outreach',interview:'s-interview',offer:'s-offer',rejected:'s-rejected'};
+  const sl={applied:'Applied',outreach:'Outreach',interview:'Interview',offer:'Offer',rejected:'Rejected'};
+  document.getElementById('app-rows').innerHTML=apps.length===0
+    ?'<div class="empty-state">No applications logged yet.</div>'
+    :apps.map(a=>`<div class="app-row">
+      <div><div style="font-weight:500;color:var(--white)">${escHtml(a.company)}</div><div style="font-size:13px;color:var(--text2)">${escHtml(a.title)}</div></div>
+      <div style="font-size:13px;color:var(--text2)">${escHtml(a.salary||'—')}</div>
+      <div style="font-size:13px;color:var(--text2)">${a.date}</div>
+      <div><span class="stage-badge ${sc[a.stage]||''}">${sl[a.stage]||a.stage}</span></div>
+      <div><button class="del-btn" onclick="deleteApp(${a.id})">Remove</button></div>
+    </div>`).join('');
+}
+
+// ─── OUTREACH BUILDER ─────────────────────────────────────
+async function generateOutreach(){
+  if(ENV==='local'||ENV==='other'){alert('Upload to GitHub Pages to use this feature.');return;}
+  if(ENV==='github'&&!getApiKey()){alert('Please enter your API key in the yellow banner first.');return;}
+  const company=document.getElementById('out-company').value.trim();
+  const role=document.getElementById('out-role').value.trim();
+  if(!company||!role){alert('Please enter company and role.');return;}
+  const p=getMasterProfile()||getProfile();
+  const typeLabels={
+    'linkedin':'LinkedIn Connection Note — STRICT 300 character maximum',
+    'cold-email':'Cold Email to Hiring Manager (subject line + body)',
+    'recruiter':'Recruiter Introduction Message',
+    'followup':'Follow-Up Message (no response after 5 days)',
+    'thankyou':'Thank You Message After Interview'
+  };
+  const prompt=`Write a ${typeLabels[document.getElementById('out-type').value]} for the following:
+
+SENDER: Experience: ${p.creds} | Clearance: ${p.clearance} | Willing to obtain: ${p.clearWilling?'Yes':'No'} | Goal: ${p.goal}
+Skills I do NOT have — never imply: ${p.noSkills}
+Company: ${company} | Role: ${role} | Contact: ${document.getElementById('out-contact').value.trim()||'Unknown'}
+Angle: ${document.getElementById('out-angle').value.trim()||'Senior cybersecurity leadership and GRC experience'}
+
+Sound like a confident senior professional. Be specific to ${company}. One version, clean and ready to send. No placeholder brackets.`;
+
+  document.getElementById('gen-btn').disabled=true;
+  document.getElementById('out-loading').classList.add('show');
+  document.getElementById('out-output').innerHTML='<span class="output-placeholder">Generating...</span>';
+  document.getElementById('out-copy-btn').style.opacity='0.3';
+  try{
+    const data=await callApi(prompt,2000);
+    if(data.error){
+      document.getElementById('out-output').textContent='API Error: '+data.error.message;
+      return;
+    }
+    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    document.getElementById('out-output').textContent=text||'Empty response. Please try again.';
+    document.getElementById('out-copy-btn').style.opacity='1';
+  }catch(e){
+    document.getElementById('out-output').textContent='Network error: '+e.message+'\n\nUpload to GitHub Pages for full functionality.';
+  }finally{
+    document.getElementById('gen-btn').disabled=false;
+    document.getElementById('out-loading').classList.remove('show');
+  }
+}
+function copyOutreach(){
+  navigator.clipboard.writeText(document.getElementById('out-output').textContent).then(()=>{
+    const btn=document.getElementById('out-copy-btn');
+    btn.textContent='✓ Copied!';
+    setTimeout(()=>btn.textContent='Copy',2000);
+  });
+}
+
+// ─── BOOLEAN STRINGS ──────────────────────────────────────
+const BOOLEANS=[
+  {p:'LinkedIn',d:'CISO/ISSO at top defense contractors',s:'("CISO" OR "ISSO" OR "Information Security Officer") AND ("Lockheed" OR "Raytheon" OR "SAIC" OR "Leidos" OR "Booz Allen") AND ("clearance" OR "cleared")'},
+  {p:'LinkedIn',d:'GRC Director / Cyber PM — defense sector',s:'("GRC Director" OR "Cyber Program Manager" OR "Cybersecurity Director") AND ("defense" OR "DoD" OR "federal") AND ("NIST" OR "RMF" OR "CMMC")'},
+  {p:'LinkedIn',d:'Senior cybersecurity leadership — remote',s:'("CISO" OR "VP Cybersecurity" OR "Head of Security") AND ("remote" OR "hybrid") AND ("cybersecurity" OR "information security") NOT "junior" NOT "entry"'},
+  {p:'LinkedIn',d:'CMMC/NIST — clearance preferred not required',s:'("CMMC" OR "NIST RMF" OR "800-53") AND ("clearance preferred" OR "clearance eligible" OR "willing to sponsor") AND ("GRC" OR "compliance")'},
+  {p:'ClearanceJobs',d:'CISO track — clearance preferred',s:'"CISO" OR "Information Security Officer" OR "Cyber Director" clearance:preferred'},
+  {p:'ClearanceJobs',d:'GRC/RMF — sponsorship available',s:'"GRC" OR "RMF" OR "NIST 800-53" AND "will sponsor" OR "sponsorship available"'},
+  {p:'ClearanceJobs',d:'ISSO — Secret or TS, DFW or remote',s:'"ISSO" OR "Information System Security Officer" AND ("Dallas" OR "Fort Worth" OR "remote" OR "telework")'},
+  {p:'ClearanceJobs',d:'CMMC 2.0 specialist — defense',s:'"CMMC" AND ("Level 2" OR "Level 3") AND ("compliance" OR "assessment" OR "advisory")'},
+  {p:'USAJobs',d:'Federal ISSO / Cybersecurity GS-13/GS-14',s:'Series:2210 Grade:13,14 "information system security" OR "cybersecurity" OR "GRC"'},
+  {p:'USAJobs',d:'Cyber Program Manager — federal',s:'"Cyber Program Manager" OR "Cybersecurity Program Manager" Series:2210 Grade:13,14,15'},
+  {p:'Indeed',d:'CISO or Deputy CISO — $150K+ national',s:'"CISO" OR "Deputy CISO" OR "VP of Cybersecurity" salary:"$150,000" OR salary:"$160,000" OR salary:"$180,000"'},
+  {p:'Indeed',d:'GRC leadership — healthcare/financial/defense',s:'("GRC" OR "governance risk compliance") AND ("Director" OR "Manager" OR "Lead") AND ("healthcare" OR "financial" OR "defense")'},
+  {p:'Indeed',d:'Fractional CISO / advisory',s:'"Fractional CISO" OR "Virtual CISO" OR "vCISO" OR "advisory CISO" NOT "intern" NOT "analyst"'},
+  {p:'Google X-Ray',d:'LinkedIn profiles — defense cybersecurity hiring managers',s:'site:linkedin.com/in "cybersecurity" AND ("CISO" OR "Director of Security") AND ("Lockheed" OR "Raytheon" OR "SAIC" OR "Leidos")'},
+  {p:'Google X-Ray',d:'Open roles not on job boards',s:'site:jobs.lockheedmartin.com OR site:careers.rtx.com "cybersecurity" OR "CISO" OR "information security officer"'},
+];
+function buildBooleans(){
+  document.getElementById('bool-list').innerHTML=BOOLEANS.map((b,i)=>`
+    <div class="bool-item">
+      <span class="bool-platform">${b.p}</span>
+      <div style="flex:1;"><div class="bool-string">${escHtml(b.s)}</div><div class="bool-desc">${b.d}</div></div>
+      <button class="bool-copy" id="bc-${i}" onclick="copyBool(${i})">Copy</button>
+    </div>`).join('');
+}
+function copyBool(i){
+  navigator.clipboard.writeText(BOOLEANS[i].s).then(()=>{
+    const btn=document.getElementById('bc-'+i);
+    btn.textContent='✓';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);
+  });
+}
+
+// ─── ENVIRONMENT DETECTION ────────────────────────────────
+// Mode A: Claude artifact (claude.ai) — API proxied, no key needed
+// Mode B: GitHub Pages (*.github.io) — HTTPS origin, key needed
+// Mode C: Google Drive / local file — blocked by CORS, warn user
+function detectEnv(){
+  const h=window.location.hostname;
+  if(!h||h===''||h==='null')return'local';
+  if(h.includes('claude.ai')||document.referrer.includes('claude.ai'))return'artifact';
+  if(h.includes('github.io'))return'github';
+  return'other';
+}
+const ENV=detectEnv();
+
+// ─── API KEY ──────────────────────────────────────────────
+function getApiKey(){return localStorage.getItem('ajax_api_key')||'';}
+function saveApiKey(){
+  const key=document.getElementById('apikey-input').value.trim();
+  if(!key||!key.startsWith('sk-')){
+    alert('Please paste a valid Anthropic API key — it should start with "sk-ant-".');return;
+  }
+  localStorage.setItem('ajax_api_key',key);
+  document.getElementById('apikey-input').value='';
+  updateApiKeyUI();
+}
+function changeApiKey(){
+  localStorage.removeItem('ajax_api_key');
+  updateApiKeyUI();
+}
+function updateApiKeyUI(){
+  const banner=document.getElementById('apikey-banner');
+  const ok=document.getElementById('apikey-ok');
+  const warn=document.getElementById('apikey-warn');
+  // Hide all first
+  banner.classList.add('hidden');
+  ok.classList.add('hidden');
+  if(warn) warn.classList.add('hidden');
+  if(ENV==='artifact'){
+    // Running inside Claude — no key needed, show green bar
+    ok.classList.remove('hidden');
+    ok.querySelector('span').textContent='✓ Running inside Claude — agents ready, no API key needed';
+  } else if(ENV==='github'){
+    // GitHub Pages — check for key
+    if(getApiKey()){ok.classList.remove('hidden');}
+    else{banner.classList.remove('hidden');}
+  } else {
+    // Google Drive / local / unknown — show CORS warning
+    if(warn) warn.classList.remove('hidden');
+  }
+}
+function getHeaders(){
+  if(ENV==='artifact'){
+    // Claude artifact — no auth headers needed, API is proxied
+    return {'Content-Type':'application/json'};
+  }
+  return {
+    'Content-Type':'application/json',
+    'x-api-key':getApiKey(),
+    'anthropic-version':'2023-06-01',
+    'anthropic-dangerous-direct-browser-access':'true'
+  };
+}
+async function callApi(prompt,maxTokens=4000){
+  if(ENV==='artifact'){
+    // Claude artifact mode — standard fetch, proxied automatically
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,
+        messages:[{role:'user',content:prompt}]})
+    });
+    return res.json();
+  } else {
+    // GitHub Pages — send full auth headers
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:getHeaders(),
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,
+        messages:[{role:'user',content:prompt}]})
+    });
+    return res.json();
+  }
+}
+
+// ─── UTILS ────────────────────────────────────────────────
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ─── INIT ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  loadProfile();
+  renderSkills();
+  buildAgents();
+  buildBooleans();
+  renderPipeline();
+  updateProfileBar();
+  updateApiKeyUI();
+  document.getElementById('app-date').value=new Date().toISOString().split('T')[0];
+});
+</script>
+</body>
+</html>

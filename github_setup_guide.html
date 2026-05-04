@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Pages Setup Guide — AJAX System</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07111f;--bg2:#0b1a2e;--panel:rgba(10,25,48,0.95);
+  --border:rgba(0,180,220,0.18);--border2:rgba(0,180,220,0.35);
+  --cyan:#00c8e8;--gold:#f5c518;--green:#00e5a0;--red:#ff6b6b;
+  --text:#cce4f0;--text2:#7a9bb5;--white:#e8f4ff;
+  --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
+  --grid:rgba(30,140,210,0.07);--grid2:rgba(30,140,210,0.035);
+}
+[data-theme="light"]{
+  --bg:#ddeeff;--bg2:#cce0f5;--panel:rgba(255,255,255,0.95);
+  --border:rgba(0,90,160,0.15);--border2:rgba(0,90,160,0.32);
+  --cyan:#005f99;--gold:#a07000;--green:#006644;--red:#bb2222;
+  --text:#0f2030;--text2:#3a6080;--white:#071520;
+  --grid:rgba(0,80,160,0.08);--grid2:rgba(0,80,160,0.04);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px),linear-gradient(var(--grid2) 1px,transparent 1px),linear-gradient(90deg,var(--grid2) 1px,transparent 1px);
+  background-size:80px 80px,80px 80px,16px 16px,16px 16px;
+  color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.65;min-height:100vh;
+}
+.topbar{background:var(--panel);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{font-family:var(--mono);font-size:12px;color:var(--cyan);letter-spacing:2px;}
+.logo span{color:var(--text2);font-size:10px;display:block;margin-top:2px;}
+.theme-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:20px;cursor:pointer;}
+.theme-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+
+.wrap{max-width:760px;margin:0 auto;padding:36px 20px 80px;}
+
+.hero{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:32px;text-align:center;}
+.hero h1{font-size:26px;font-weight:700;color:var(--white);margin-bottom:8px;}
+.hero p{font-size:15px;color:var(--text2);max-width:500px;margin:0 auto 20px;}
+.time-badge{display:inline-block;background:rgba(0,229,160,0.12);border:1px solid rgba(0,229,160,0.3);color:var(--green);font-family:var(--mono);font-size:11px;padding:5px 14px;border-radius:20px;}
+
+/* STEP CARDS */
+.step{background:var(--panel);border:1px solid var(--border);border-radius:14px;margin-bottom:16px;overflow:hidden;}
+.step-header{display:flex;align-items:flex-start;gap:16px;padding:20px 24px;}
+.step-num{background:var(--cyan);color:#000;font-family:var(--mono);font-size:13px;font-weight:700;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.step-title{font-size:17px;font-weight:600;color:var(--white);margin-bottom:4px;}
+.step-sub{font-size:14px;color:var(--text2);line-height:1.6;}
+.step-body{padding:0 24px 20px 76px;}
+
+/* VISUAL BOXES */
+.screen{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:12px 0;}
+.screen-bar{background:rgba(0,0,0,0.3);padding:8px 14px;display:flex;align-items:center;gap:6px;}
+.dot{width:10px;height:10px;border-radius:50%;}
+.screen-url{font-family:var(--mono);font-size:11px;color:var(--text2);margin-left:8px;}
+.screen-body{padding:16px;}
+
+/* CLICK TARGETS */
+.click-target{display:inline-flex;align-items:center;gap:6px;background:rgba(0,229,160,0.1);border:1px solid rgba(0,229,160,0.3);color:var(--green);font-family:var(--mono);font-size:12px;padding:5px 12px;border-radius:6px;margin:3px 2px;}
+.click-target.green{background:rgba(0,229,160,0.85);color:#000;border-color:var(--green);}
+.click-target.blue{background:rgba(0,88,212,0.8);color:#fff;border-color:#0058d4;}
+.click-target.grey{background:rgba(100,120,140,0.2);border-color:var(--border);color:var(--text);}
+.arrow{color:var(--text2);font-size:14px;margin:0 4px;}
+
+/* FIELD MOCKUP */
+.field-mock{background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:6px;padding:8px 12px;font-size:13px;color:var(--text);margin:6px 0;display:flex;align-items:center;gap:10px;}
+.field-mock .label{font-family:var(--mono);font-size:10px;color:var(--text2);width:120px;flex-shrink:0;}
+.field-mock .value{color:var(--cyan);font-family:var(--mono);font-size:12px;}
+.field-mock .placeholder{color:var(--text2);opacity:.6;font-size:13px;}
+
+/* CALLOUT */
+.callout{border-radius:9px;padding:13px 16px;margin:12px 0;font-size:14px;line-height:1.6;}
+.callout.gold{background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.25);color:var(--gold);}
+.callout.green{background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);color:var(--green);}
+.callout.cyan{background:rgba(0,200,232,0.08);border:1px solid rgba(0,200,232,0.25);color:var(--cyan);}
+.callout b{color:var(--white);}
+
+/* URL BOX */
+.url-box{background:var(--bg2);border:1px solid var(--border2);border-radius:9px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0;flex-wrap:wrap;}
+.url-text{font-family:var(--mono);font-size:14px;color:var(--cyan);}
+.url-copy{background:var(--cyan);color:#000;font-family:var(--mono);font-size:11px;font-weight:700;padding:6px 14px;border:none;border-radius:6px;cursor:pointer;}
+.url-copy:hover{opacity:.85;}
+
+/* SECTION DIVIDER */
+.section-label{font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin:28px 0 14px;display:flex;align-items:center;gap:12px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* NAV LINKS */
+.nav-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+.nav-link{background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:12px 18px;font-size:14px;color:var(--text);text-decoration:none;transition:border-color .15s;flex:1;min-width:200px;text-align:center;}
+.nav-link:hover{border-color:var(--cyan);color:var(--cyan);}
+.nav-link span{display:block;font-size:12px;color:var(--text2);margin-top:3px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">AJAX CAREER INTELLIGENCE
+    <span>GitHub Pages Setup Guide</span>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">☾ Dark</button>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>Get AJAX Running in 10 Minutes</h1>
+    <p>A permanent URL for your job search system — no more Google Drive links, no more CORS errors. Free forever on GitHub Pages.</p>
+    <div class="time-badge">⏱ Estimated time: 8–12 minutes</div>
+  </div>
+
+  <!-- WHAT YOU NEED -->
+  <div class="section-label">Before You Start</div>
+  <div class="callout cyan">
+    <b>What you need:</b> A free GitHub account (github.com) and the ajax_v3.html file downloaded from Claude. That's it. No coding, no command line, no technical knowledge required.
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="section-label">Part 1 — Create Your GitHub Account & Repository</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Create a Free GitHub Account</div>
+        <div class="step-sub">Skip this step if you already have a GitHub account (username: corvus-one). Jump to Step 2.</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p style="margin-bottom:10px;font-size:14px;color:var(--text2);">Go to <strong style="color:var(--cyan)">github.com</strong> and click Sign Up. Use your r321limited@gmail.com so your API credits and GitHub are under the same Google account.</p>
+      <div class="callout gold"><b>Username tip:</b> You already have corvus-one from your CISO tracker. Sign in to that account — don't create a new one.</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Create a New Repository</div>
+        <div class="step-sub">A repository is just a folder on GitHub that holds your files. Think of it like a Google Drive folder.</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p style="font-size:14px;color:var(--text2);margin-bottom:12px;">Once signed in, click the <strong style="color:var(--white)">+</strong> icon in the top right corner, then select:</p>
+
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap;">
+        <span class="click-target grey">+ ▾</span>
+        <span class="arrow">→</span>
+        <span class="click-target">New repository</span>
+      </div>
+
+      <div class="screen">
+        <div class="screen-bar">
+          <div class="dot" style="background:#ff5f57"></div>
+          <div class="dot" style="background:#febc2e"></div>
+          <div class="dot" style="background:#28c840"></div>
+          <div class="screen-url">github.com/new</div>
+        </div>
+        <div class="screen-body">
+          <div class="field-mock">
+            <span class="label">Owner</span>
+            <span class="value">corvus-one</span>
+          </div>
+          <div class="field-mock">
+            <span class="label">Repository name</span>
+            <span class="value">ajax-system</span>
+          </div>
+          <div class="field-mock">
+            <span class="label">Description</span>
+            <span class="placeholder">AJAX Career Intelligence Command Center</span>
+          </div>
+          <div class="field-mock">
+            <span class="label">Visibility</span>
+            <span class="value">● Public &nbsp; ○ Private</span>
+          </div>
+          <div style="margin-top:10px;font-size:12px;color:var(--text2);">☑ Add a README file &nbsp; (check this box)</div>
+          <div style="margin-top:14px;"><span class="click-target green">Create repository</span></div>
+        </div>
+      </div>
+
+      <div class="callout gold" style="margin-top:10px;">
+        <b>Important:</b> Set visibility to <b>Public</b>. GitHub Pages only works on public repos for free accounts. Your HTML file doesn't contain sensitive data — your API key is stored in your browser only, never in the file.
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: UPLOAD -->
+  <div class="section-label">Part 2 — Upload Your AJAX File</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Download ajax_v3.html from Claude</div>
+        <div class="step-sub">You need the file saved on your computer before uploading to GitHub.</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p style="font-size:14px;color:var(--text2);">In the Claude chat, click the <strong style="color:var(--white)">ajax v3</strong> file link. When it opens in your browser, press <strong style="color:var(--white)">Ctrl + S</strong> (Windows) or <strong style="color:var(--white)">Cmd + S</strong> (Mac) to save it. Save it to your Downloads folder. Make sure the filename is exactly <strong style="color:var(--cyan)">index.html</strong> — rename it if needed.</p>
+      <div class="callout cyan"><b>Why index.html?</b> GitHub Pages looks for a file called index.html as the home page. If you name it something else, the URL won't load automatically.</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Upload the File to Your Repository</div>
+        <div class="step-sub">Drag and drop — no coding required.</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p style="font-size:14px;color:var(--text2);margin-bottom:12px;">Inside your new <strong style="color:var(--white)">ajax-system</strong> repository, click:</p>
+
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap;">
+        <span class="click-target">Add file</span>
+        <span class="arrow">→</span>
+        <span class="click-target">Upload files</span>
+      </div>
+
+      <div class="screen">
+        <div class="screen-bar">
+          <div class="dot" style="background:#ff5f57"></div>
+          <div class="dot" style="background:#febc2e"></div>
+          <div class="dot" style="background:#28c840"></div>
+          <div class="screen-url">github.com/corvus-one/ajax-system/upload</div>
+        </div>
+        <div class="screen-body">
+          <div style="background:rgba(0,200,232,0.06);border:2px dashed var(--border2);border-radius:8px;padding:24px;text-align:center;margin-bottom:14px;">
+            <div style="font-size:24px;margin-bottom:6px;">📁</div>
+            <div style="font-size:14px;color:var(--text2);">Drag <strong style="color:var(--white)">index.html</strong> here</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px;">or click "choose your files"</div>
+          </div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:10px;"><strong style="color:var(--white)">Commit changes</strong> section:</div>
+          <div class="field-mock" style="margin-bottom:6px;">
+            <span class="label">Commit message</span>
+            <span class="value">Add AJAX system v3</span>
+          </div>
+          <div style="margin-top:10px;"><span class="click-target green">Commit changes</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: GITHUB PAGES -->
+  <div class="section-label">Part 3 — Enable GitHub Pages</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div>
+        <div class="step-title">Turn On GitHub Pages</div>
+        <div class="step-sub">This converts your repo into a live website. Takes about 60 seconds after saving.</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p style="font-size:14px;color:var(--text2);margin-bottom:12px;">From inside your repository, click through this path:</p>
+
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap;font-size:14px;">
+        <span class="click-target">⚙ Settings</span>
+        <span class="arrow">→</span>
+        <span class="click-target">Pages</span>
+        <span style="color:var(--text2);font-size:12px;">(left sidebar, under "Code and automation")</span>
+      </div>
+
+      <div class="screen">
+        <div class="screen-bar">
+          <div class="dot" style="background:#ff5f57"></div>
+          <div class="dot" style="background:#febc2e"></div>
+          <div class="dot" style="background:#28c840"></div>
+          <div class="screen-url">github.com/corvus-one/ajax-system/settings/pages</div>
+        </div>
+        <div class="screen-body">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:10px;"><strong style="color:var(--white)">Build and deployment</strong></div>
+          <div class="field-mock" style="margin-bottom:6px;">
+            <span class="label">Source</span>
+            <span class="value">Deploy from a branch</span>
+          </div>
+          <div class="field-mock" style="margin-bottom:6px;">
+            <span class="label">Branch</span>
+            <span class="value">main &nbsp; / (root)</span>
+          </div>
+          <div style="margin-top:10px;"><span class="click-target green">Save</span></div>
+        </div>
+      </div>
+
+      <div class="callout green" style="margin-top:12px;">
+        After clicking Save, GitHub will show a banner: <strong>"Your site is live at..."</strong> — it usually takes 30–90 seconds to go live. Refresh the Settings → Pages screen after a minute if you don't see it yet.
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: YOUR URL -->
+  <div class="section-label">Part 4 — Your Permanent URL</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">6</div>
+      <div>
+        <div class="step-title">Bookmark Your Live URL</div>
+        <div class="step-sub">This is your permanent address. It never expires. Bookmark it and you're done.</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="url-box">
+        <span class="url-text">https://corvus-one.github.io/ajax-system/</span>
+        <button class="url-copy" onclick="copyUrl()">Copy URL</button>
+      </div>
+
+      <p style="font-size:14px;color:var(--text2);margin-bottom:12px;">Open that URL in Chrome. You should see the AJAX system with the yellow API key banner at the top. Paste your Anthropic API key, click Save Key, and every agent is ready to run.</p>
+
+      <div class="callout cyan"><b>Your API key stays in your browser only.</b> It is never uploaded to GitHub, never visible in your file, and never sent anywhere except directly to the Anthropic API when you run an agent.</div>
+    </div>
+  </div>
+
+  <!-- STEP 5: UPDATES -->
+  <div class="section-label">Part 5 — Updating the System Later</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">7</div>
+      <div>
+        <div class="step-title">How to Update When Claude Delivers a New Version</div>
+        <div class="step-sub">Every time we ship an improvement, follow these 3 steps to push it live.</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <ol style="padding-left:20px;">
+        <li style="margin-bottom:12px;font-size:14px;color:var(--text2);"><b style="color:var(--white);">Download the new file from Claude</b> — save it as <span style="color:var(--cyan);font-family:var(--mono);">index.html</span></li>
+        <li style="margin-bottom:12px;font-size:14px;color:var(--text2);"><b style="color:var(--white);">Go to your repo</b> — <span style="color:var(--cyan);font-family:var(--mono);">github.com/corvus-one/ajax-system</span> — click on <span style="color:var(--cyan);">index.html</span> in the file list</li>
+        <li style="font-size:14px;color:var(--text2);"><b style="color:var(--white);">Click the pencil icon</b> (Edit) → then click <span class="click-target">Upload file</span> at the top of the editor → drop your new index.html → <span class="click-target green">Commit changes</span>. Live in 60 seconds.</li>
+      </ol>
+      <div class="callout gold" style="margin-top:12px;"><b>Your data is safe across updates.</b> Profile, pipeline applications, and API key are all stored in your browser's localStorage — not in the HTML file. Updating the file never wipes your data.</div>
+    </div>
+  </div>
+
+  <!-- TROUBLESHOOTING -->
+  <div class="section-label">Troubleshooting</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">?</div>
+      <div>
+        <div class="step-title">Common Issues & Fixes</div>
+        <div class="step-sub">If something doesn't look right, start here.</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="callout gold"><b>Page shows 404 error:</b> GitHub Pages isn't live yet — wait 90 seconds and refresh. If it persists, go back to Settings → Pages and confirm Branch is set to "main" and folder is "/ (root)".</div>
+        <div class="callout gold"><b>Page is blank or shows raw code:</b> The file wasn't saved as index.html. Go to your repo, click the filename, rename it to index.html using the pencil icon.</div>
+        <div class="callout gold"><b>Agents still say "network error":</b> Clear your browser cache (Ctrl+Shift+Delete) and reload. Then re-enter your API key — it clears with the cache.</div>
+        <div class="callout gold"><b>"Invalid API key" error:</b> Your key may have expired or was entered incorrectly. Go to console.anthropic.com → API Keys → create a new one and paste it fresh.</div>
+        <div class="callout green"><b>Everything working:</b> Green bar says "✓ API KEY CONFIGURED" and the first agent run returns a real response. Bookmark the URL and you're operational.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM LINKS -->
+  <div class="section-label">Quick Links</div>
+  <div class="nav-links">
+    <a class="nav-link" href="https://github.com/new" target="_blank">
+      Create New Repository
+      <span>github.com/new</span>
+    </a>
+    <a class="nav-link" href="https://console.anthropic.com/settings/keys" target="_blank">
+      Get API Key
+      <span>console.anthropic.com</span>
+    </a>
+    <a class="nav-link" href="https://corvus-one.github.io/ajax-system/" target="_blank">
+      Your AJAX System URL
+      <span>corvus-one.github.io/ajax-system</span>
+    </a>
+  </div>
+
+</div>
+
+<script>
+let isDark=true;
+function toggleTheme(){
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'':'light');
+  document.getElementById('theme-btn').textContent=isDark?'☾ Dark':'☀ Light';
+}
+function copyUrl(){
+  navigator.clipboard.writeText('https://corvus-one.github.io/ajax-system/').then(()=>{
+    const btn=document.querySelector('.url-copy');
+    btn.textContent='✓ Copied!';
+    setTimeout(()=>btn.textContent='Copy URL',2000);
+  });
+}
+</script>
+</body>
+</html>
