@@ -809,28 +809,68 @@ Sort by score descending.`
   },
   {
     num:'03',name:'Email Watch',
-    tagline:'Monitors Gmail for recruiters, interviews, and application status',
+    tagline:'Monitors Gmail · organizes inbox · drafts replies from career address',
     freq:'Run every 48 hours',
-    tip:'This agent requires your Gmail connector to be active in Claude. It runs in a separate Claude chat tab — it is the one exception to the integrated system.',
+    tip:'Gmail connector must be active in your Claude chat. Emails from brihan.browne.career@gmail.com auto-forward here — agent scans r321limited@gmail.com and always routes replies back through your career address.',
     isExternal:true,
     inputs:[],
-    buildPrompt:(ctx,p)=>`You are an email monitoring agent. Use my connected Gmail account to scan for job search messages.
+    buildPrompt:(ctx,p)=>`You are an email monitoring and inbox organization agent with access to my Gmail via the Gmail connector.
+
+EMAIL SETUP - CRITICAL CONTEXT:
+- Scanning inbox: r321limited@gmail.com (my main Gmail, connected to Claude)
+- My public career address: brihan.browne.career@gmail.com
+- All emails sent to my career address auto-forward to r321limited@gmail.com
+- Forwarded emails show brihan.browne.career@gmail.com in the original "To" field
+- ALL reply drafts must be written to send FROM: brihan.browne.career@gmail.com
+- Recruiters and employers must NEVER see r321limited@gmail.com
 
 MY PROFILE:
 - Applying for: ${p.titles}
 - Target companies: Lockheed Martin, Raytheon, SAIC, Leidos, Booz Allen Hamilton, and other defense/cybersecurity firms
 - Minimum salary: ${p.salary}
+- Clearance: ${p.clearance} | Willing to obtain: ${p.clearWilling?'Yes':'No'}
 
-TASKS:
-1. Search Gmail for emails from the last 48 hours containing: "opportunity", "your application", "interview", "phone screen", "availability", "recruiter", "hiring manager", "next steps", "offer"
-2. Categorize each relevant email: RECRUITER OUTREACH / INTERVIEW REQUEST / APPLICATION UPDATE / REJECTION / ACTION REQUIRED
-3. For each: sender, company, category, key details, suggested reply approach
-4. Draft a short reply for any INTERVIEW REQUEST or high-priority RECRUITER OUTREACH
+STEP 1 - SEARCH AND CATEGORIZE:
+Search Gmail for emails from the last 48 hours containing:
+"opportunity", "your application", "interview", "phone screen", "availability", "recruiter", "hiring manager", "next steps", "offer", "position", "role", "clearance", "connect"
 
-RESPONSE RULE: Reply to every recruiter within 24 hours.`
+For each relevant email identify:
+- Sender name and email address
+- Original To address (career address or main Gmail?)
+- Category: RECRUITER OUTREACH / INTERVIEW REQUEST / APPLICATION UPDATE / REJECTION / ACTION REQUIRED
+- Key details: role mentioned, company, dates, deadlines
+- Priority: HIGH / MEDIUM / LOW
+- Required action and deadline
+
+STEP 2 - APPLY GMAIL LABELS:
+Apply these labels to each categorized email (create labels if they do not exist):
+- RECRUITER OUTREACH: label AJAX/Recruiter
+- INTERVIEW REQUEST: label AJAX/Interview
+- APPLICATION UPDATE: label AJAX/AppStatus
+- REJECTION: label AJAX/Rejected
+- ACTION REQUIRED: label AJAX/ActionRequired
+
+STEP 3 - DRAFT REPLIES:
+For every INTERVIEW REQUEST and every HIGH priority RECRUITER OUTREACH, draft a complete reply.
+
+CRITICAL REPLY RULES:
+- Always FROM: brihan.browne.career@gmail.com - never mention r321limited@gmail.com
+- Tone: confident senior cybersecurity professional, not a job seeker
+- Interview requests: confirm enthusiasm, request available time slots if not provided, ask whether the interview is phone, video, or panel
+- Recruiter outreach: engage warmly even for borderline roles - all doors stay open
+- Rejections: brief professional acknowledgment, ask to be kept in mind for future roles that match your background
+- Never sound desperate or over-eager
+
+STEP 4 - INBOX SUMMARY:
+Produce a clean summary table:
+Priority | Sender | Company | Category | Action Required | Reply Drafted? | Label Applied
+
+Then list each full drafted reply, clearly labeled with the recipient name, their email, and the subject line.
+
+RESPONSE RULE: Every recruiter gets a reply within 24 hours. A brief warm reply to a rejection or borderline role keeps your name top of mind and your pipeline warm.`
   },
   {
-    num:'04',name:'Resume Tailor',
+    num:'04',name:'Resume Tailor',    num:'04',name:'Resume Tailor',
     tagline:'ATS-optimized · skills-honest · no inflation · per application',
     freq:'Run once per application',
     tip:'Paste the complete job description — not just the title. The more text you give it, the higher your ATS keyword match. Save each output as Resume_Company_Role_Date.pdf in Google Drive /AJAX/Resumes/.',
