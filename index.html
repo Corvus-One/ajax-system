@@ -1305,29 +1305,145 @@ function copyOutreach(){
 
 // ─── BOOLEAN STRINGS ──────────────────────────────────────
 const BOOLEANS=[
-  {p:'LinkedIn',d:'CISO/ISSO at top defense contractors',s:'("CISO" OR "ISSO" OR "Information Security Officer") AND ("Lockheed" OR "Raytheon" OR "SAIC" OR "Leidos" OR "Booz Allen") AND ("clearance" OR "cleared")'},
-  {p:'LinkedIn',d:'GRC Director / Cyber PM — defense sector',s:'("GRC Director" OR "Cyber Program Manager" OR "Cybersecurity Director") AND ("defense" OR "DoD" OR "federal") AND ("NIST" OR "RMF" OR "CMMC")'},
-  {p:'LinkedIn',d:'Senior cybersecurity leadership — remote',s:'("CISO" OR "VP Cybersecurity" OR "Head of Security") AND ("remote" OR "hybrid") AND ("cybersecurity" OR "information security") NOT "junior" NOT "entry"'},
-  {p:'LinkedIn',d:'CMMC/NIST — clearance preferred not required',s:'("CMMC" OR "NIST RMF" OR "800-53") AND ("clearance preferred" OR "clearance eligible" OR "willing to sponsor") AND ("GRC" OR "compliance")'},
-  {p:'ClearanceJobs',d:'CISO track — clearance preferred',s:'"CISO" OR "Information Security Officer" OR "Cyber Director" clearance:preferred'},
-  {p:'ClearanceJobs',d:'GRC/RMF — sponsorship available',s:'"GRC" OR "RMF" OR "NIST 800-53" AND "will sponsor" OR "sponsorship available"'},
-  {p:'ClearanceJobs',d:'ISSO — Secret or TS, DFW or remote',s:'"ISSO" OR "Information System Security Officer" AND ("Dallas" OR "Fort Worth" OR "remote" OR "telework")'},
-  {p:'ClearanceJobs',d:'CMMC 2.0 specialist — defense',s:'"CMMC" AND ("Level 2" OR "Level 3") AND ("compliance" OR "assessment" OR "advisory")'},
-  {p:'USAJobs',d:'Federal ISSO / Cybersecurity GS-13/GS-14',s:'Series:2210 Grade:13,14 "information system security" OR "cybersecurity" OR "GRC"'},
-  {p:'USAJobs',d:'Cyber Program Manager — federal',s:'"Cyber Program Manager" OR "Cybersecurity Program Manager" Series:2210 Grade:13,14,15'},
-  {p:'Indeed',d:'CISO or Deputy CISO — $150K+ national',s:'"CISO" OR "Deputy CISO" OR "VP of Cybersecurity" salary:"$150,000" OR salary:"$160,000" OR salary:"$180,000"'},
-  {p:'Indeed',d:'GRC leadership — healthcare/financial/defense',s:'("GRC" OR "governance risk compliance") AND ("Director" OR "Manager" OR "Lead") AND ("healthcare" OR "financial" OR "defense")'},
-  {p:'Indeed',d:'Fractional CISO / advisory',s:'"Fractional CISO" OR "Virtual CISO" OR "vCISO" OR "advisory CISO" NOT "intern" NOT "analyst"'},
-  {p:'Google X-Ray',d:'LinkedIn profiles — defense cybersecurity hiring managers',s:'site:linkedin.com/in "cybersecurity" AND ("CISO" OR "Director of Security") AND ("Lockheed" OR "Raytheon" OR "SAIC" OR "Leidos")'},
-  {p:'Google X-Ray',d:'Open roles not on job boards',s:'site:jobs.lockheedmartin.com OR site:careers.rtx.com "cybersecurity" OR "CISO" OR "information security officer"'},
+
+  // ── LINKEDIN ─────────────────────────────────────────────────
+  {p:'LinkedIn',cat:'CISO Track',d:'CISO / Deputy CISO at primary defense contractors',
+   s:'("CISO" OR "Deputy CISO" OR "Chief Information Security Officer") AND ("Lockheed" OR "Raytheon" OR "RTX" OR "SAIC" OR "Leidos" OR "Booz Allen") NOT "intern" NOT "analyst"'},
+
+  {p:'LinkedIn',cat:'CISO Track',d:'VP or Director Cybersecurity — defense and cleared',
+   s:'("VP Cybersecurity" OR "Director of Cybersecurity" OR "Director Information Security") AND ("clearance" OR "cleared" OR "DoD" OR "defense") AND ("NIST" OR "RMF" OR "800-53")'},
+
+  {p:'LinkedIn',cat:'GRC / RMF',d:'GRC Director or Cyber PM — NIST and CMMC focus',
+   s:'("GRC Director" OR "Cyber Program Manager" OR "Cybersecurity Program Manager") AND ("NIST" OR "RMF" OR "CMMC") AND ("defense" OR "contractor" OR "cleared") NOT "entry" NOT "junior"'},
+
+  {p:'LinkedIn',cat:'SIEM / SOC',d:'Splunk or Sentinel leadership — defense contractor',
+   s:'("Splunk" OR "Microsoft Sentinel" OR "SIEM") AND ("Director" OR "Manager" OR "Lead" OR "Architect") AND ("defense" OR "cleared" OR "DoD") AND ("cybersecurity" OR "security operations")'},
+
+  {p:'LinkedIn',cat:'Clearance',d:'Clearance sponsorship available — cyber leadership',
+   s:'("clearance sponsorship" OR "will sponsor clearance" OR "clearance eligible") AND ("cybersecurity" OR "information security") AND ("Director" OR "Manager" OR "CISO" OR "ISSO")'},
+
+  {p:'LinkedIn',cat:'Remote + Travel',d:'Remote cyber leadership — travel acceptable',
+   s:'("remote" OR "hybrid") AND ("CISO" OR "Director" OR "GRC" OR "cybersecurity") AND ("defense" OR "DoD" OR "cleared") AND ("travel" OR "occasional onsite") NOT "relocation required"'},
+
+  {p:'LinkedIn',cat:'Company Direct',d:'Lockheed Martin cybersecurity leadership openings',
+   s:'("Lockheed Martin") AND ("cybersecurity" OR "information security" OR "ISSO" OR "CISO") AND ("Director" OR "Manager" OR "Lead" OR "Senior") AND ("RMF" OR "NIST" OR "clearance")'},
+
+  {p:'LinkedIn',cat:'Company Direct',d:'Leidos and SAIC — cyber director and GRC roles',
+   s:'("Leidos" OR "SAIC") AND ("cybersecurity" OR "GRC" OR "RMF" OR "ISSO") AND ("Director" OR "Senior Manager" OR "Program Manager") AND ("clearance" OR "cleared")'},
+
+  {p:'LinkedIn',cat:'Company Direct',d:'Booz Allen and Raytheon — CISO track',
+   s:'("Booz Allen" OR "Raytheon" OR "RTX") AND ("CISO" OR "cybersecurity director" OR "information security director") AND ("clearance" OR "DoD") NOT "entry" NOT "junior"'},
+
+  {p:'LinkedIn',cat:'Expanded Net',d:'CACI ManTech Parsons — fast-hire defense cyber',
+   s:'("CACI" OR "ManTech" OR "Parsons") AND ("cybersecurity" OR "information security" OR "GRC") AND ("Director" OR "Manager" OR "CISO" OR "ISSO") AND ("clearance" OR "RMF")'},
+
+  // ── CLEARANCEJOBS ────────────────────────────────────────────
+  {p:'ClearanceJobs',cat:'CISO Track',d:'CISO and Security Director — clearance preferred not required',
+   s:'("CISO" OR "Chief Information Security Officer" OR "Director of Cybersecurity") AND ("preferred" OR "eligible" OR "sponsorship") NOT "TS/SCI required" NOT "polygraph required"'},
+
+  {p:'ClearanceJobs',cat:'CISO Track',d:'Deputy CISO or VP Cybersecurity — active sponsor',
+   s:'("Deputy CISO" OR "VP Cybersecurity" OR "VP Information Security") AND ("will sponsor" OR "sponsorship available" OR "clearance preferred")'},
+
+  {p:'ClearanceJobs',cat:'GRC / RMF',d:'GRC Director — NIST 800-53 and RMF',
+   s:'("GRC" OR "Governance Risk Compliance") AND ("Director" OR "Manager" OR "Lead") AND ("NIST 800-53" OR "RMF" OR "Risk Management Framework") AND ("contractor" OR "defense")'},
+
+  {p:'ClearanceJobs',cat:'GRC / RMF',d:'RMF Program Manager — secret clearance eligible',
+   s:'("RMF" OR "Risk Management Framework") AND ("Program Manager" OR "Cyber PM" OR "ISSO") AND ("Secret" OR "eligible" OR "sponsorship") AND ("Leidos" OR "SAIC" OR "Booz Allen" OR "Lockheed" OR "Raytheon")'},
+
+  {p:'ClearanceJobs',cat:'SIEM / SOC',d:'Splunk engineer or architect — director level',
+   s:'("Splunk") AND ("Director" OR "Architect" OR "Lead" OR "Senior Manager") AND ("security" OR "SOC" OR "SIEM") AND ("defense" OR "cleared" OR "DoD")'},
+
+  {p:'ClearanceJobs',cat:'SIEM / SOC',d:'Microsoft Sentinel — Azure security leadership',
+   s:'("Sentinel" OR "Microsoft Sentinel" OR "Azure Sentinel") AND ("Director" OR "Lead" OR "Manager" OR "Architect") AND ("security" OR "SOC" OR "SIEM")'},
+
+  {p:'ClearanceJobs',cat:'Location',d:'Dallas Fort Worth — cyber director hybrid or travel',
+   s:'("Dallas" OR "Fort Worth" OR "DFW" OR "Texas") AND ("cybersecurity" OR "information security" OR "CISO" OR "GRC") AND ("Director" OR "Manager" OR "Senior") AND ("remote" OR "hybrid" OR "travel")'},
+
+  {p:'ClearanceJobs',cat:'Location',d:'Remote cyber leadership — travel to DC or CONUS',
+   s:'("remote" OR "telework") AND ("cybersecurity" OR "GRC" OR "CISO" OR "ISSO") AND ("Director" OR "Senior" OR "Lead") AND ("travel" OR "occasional" OR "as needed")'},
+
+  {p:'ClearanceJobs',cat:'Clearance',d:'No clearance required — sponsorship offered',
+   s:'("no clearance required" OR "will sponsor" OR "clearance not required" OR "clearance preferred") AND ("cybersecurity" OR "GRC" OR "CISO" OR "information security") AND ("Director" OR "Manager")'},
+
+  // ── INDEED ──────────────────────────────────────────────────
+  {p:'Indeed',cat:'CISO Track',d:'CISO roles — $148K+ defense and contractor',
+   s:'"CISO" OR "Chief Information Security Officer" OR "Deputy CISO" ("defense" OR "contractor" OR "cleared" OR "DoD") -"entry level" -"junior"'},
+
+  {p:'Indeed',cat:'CISO Track',d:'VP or Director Cybersecurity — $150K floor',
+   s:'("VP of Cybersecurity" OR "VP Information Security" OR "Director of Cybersecurity" OR "Director Information Security") ("defense" OR "contractor" OR "government") -"entry" -"analyst"'},
+
+  {p:'Indeed',cat:'GRC / RMF',d:'GRC Director — defense and regulated industry',
+   s:'("GRC Director" OR "Director GRC" OR "Governance Risk Compliance Director") ("NIST" OR "RMF" OR "CMMC" OR "defense" OR "DoD")'},
+
+  {p:'Indeed',cat:'SIEM / SOC',d:'Splunk Director or Architect — security leadership',
+   s:'("Splunk") ("Director" OR "Architect" OR "Senior Manager" OR "Lead") ("security" OR "SIEM" OR "SOC" OR "cybersecurity") -"junior" -"analyst"'},
+
+  {p:'Indeed',cat:'Clearance',d:'Clearance sponsorship — cyber and GRC leadership',
+   s:'("clearance sponsorship" OR "will sponsor clearance" OR "clearance preferred") ("cybersecurity" OR "information security" OR "GRC") ("Director" OR "Manager" OR "Senior")'},
+
+  // ── COMPANY CAREER PAGES — GOOGLE X-RAY ─────────────────────
+  {p:'Google X-Ray',cat:'Company Direct',d:'Lockheed Martin — cybersecurity openings',
+   s:'site:careers.lockheedmartin.com ("cybersecurity" OR "information security" OR "CISO" OR "GRC" OR "RMF")'},
+
+  {p:'Google X-Ray',cat:'Company Direct',d:'Raytheon RTX — cyber director and GRC roles',
+   s:'site:careers.rtx.com ("cybersecurity" OR "CISO" OR "GRC" OR "information security" OR "RMF" OR "NIST")'},
+
+  {p:'Google X-Ray',cat:'Company Direct',d:'SAIC — cybersecurity leadership openings',
+   s:'site:jobs.saic.com ("cybersecurity" OR "CISO" OR "information security" OR "GRC" OR "Splunk" OR "RMF")'},
+
+  {p:'Google X-Ray',cat:'Company Direct',d:'Leidos — cyber director and program manager',
+   s:'site:leidos.com ("cybersecurity" OR "CISO" OR "GRC" OR "RMF" OR "information security" OR "Splunk")'},
+
+  {p:'Google X-Ray',cat:'Company Direct',d:'Booz Allen — cyber leadership and CISO track',
+   s:'site:boozallen.com ("cybersecurity" OR "CISO" OR "GRC" OR "information security" OR "RMF" OR "NIST")'},
+
+  {p:'Google X-Ray',cat:'Company Direct',d:'CACI ManTech — cyber director openings',
+   s:'site:caci.com OR site:mantech.com ("cybersecurity" OR "CISO" OR "GRC" OR "information security" OR "Director")'},
+
+  {p:'Google X-Ray',cat:'Hiring Managers',d:'LinkedIn — cybersecurity hiring managers at target companies',
+   s:'site:linkedin.com/in ("cybersecurity" OR "information security") AND ("Director" OR "VP" OR "CISO") AND ("Lockheed" OR "Raytheon" OR "SAIC" OR "Leidos" OR "Booz Allen" OR "CACI" OR "ManTech")'},
+
+  {p:'Google X-Ray',cat:'Hiring Managers',d:'LinkedIn — Splunk or Sentinel hiring managers — defense',
+   s:'site:linkedin.com/in ("Splunk" OR "Microsoft Sentinel") AND ("Director" OR "Manager" OR "VP") AND ("defense" OR "cleared" OR "DoD" OR "cybersecurity")'},
+
 ];
-function buildBooleans(){
-  document.getElementById('bool-list').innerHTML=BOOLEANS.map((b,i)=>`
-    <div class="bool-item">
-      <span class="bool-platform">${b.p}</span>
-      <div style="flex:1;"><div class="bool-string">${escHtml(b.s)}</div><div class="bool-desc">${b.d}</div></div>
-      <button class="bool-copy" id="bc-${i}" onclick="copyBool(${i})">Copy</button>
+function buildBooleans(filter='ALL'){
+  const platforms=['ALL','LinkedIn','ClearanceJobs','Indeed','Google X-Ray'];
+  const cats=['ALL','CISO Track','GRC / RMF','SIEM / SOC','Clearance','Location','Company Direct','Expanded Net','Hiring Managers'];
+
+  const filterBar=`<div style="margin-bottom:12px;">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:1px;margin-bottom:6px;">FILTER BY PLATFORM</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+      ${platforms.map(p=>`<button onclick="buildBooleans('${p}')" style="background:${filter===p?'var(--cyan)':'var(--bg2)'};color:${filter===p?'#000':'var(--text2)'};border:1px solid ${filter===p?'var(--cyan)':'var(--border)'};font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:4px;cursor:pointer;">${p}</button>`).join('')}
+    </div>
+    <div style="font-size:12px;color:var(--text2);">Showing ${filter==='ALL'?BOOLEANS.length:BOOLEANS.filter(b=>b.p===filter).length} of ${BOOLEANS.length} search strings — tuned to your profile</div>
+  </div>`;
+
+  const filtered=filter==='ALL'?BOOLEANS:BOOLEANS.filter(b=>b.p===filter);
+
+  // Group by category
+  const groups={};
+  filtered.forEach((b,origIdx)=>{
+    const cat=b.cat||b.p;
+    if(!groups[cat])groups[cat]=[];
+    groups[cat].push({...b,origIdx:BOOLEANS.indexOf(b)});
+  });
+
+  const html=Object.entries(groups).map(([cat,items])=>`
+    <div style="margin-bottom:16px;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border);">${cat}</div>
+      ${items.map(b=>`
+        <div class="bool-item">
+          <span class="bool-platform">${b.p}</span>
+          <div style="flex:1;">
+            <div class="bool-string">${escHtml(b.s)}</div>
+            <div class="bool-desc">${b.d}</div>
+          </div>
+          <button class="bool-copy" id="bc-${b.origIdx}" onclick="copyBool(${b.origIdx})">Copy</button>
+        </div>`).join('')}
     </div>`).join('');
+
+  document.getElementById('bool-list').innerHTML=filterBar+html;
 }
 function copyBool(i){
   navigator.clipboard.writeText(BOOLEANS[i].s).then(()=>{
@@ -1430,7 +1546,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   loadProfile();
   renderSkills();
   buildAgents();
-  buildBooleans();
+  buildBooleans('ALL');
   renderPipeline();
   updateProfileBar();
   updateApiKeyUI();
