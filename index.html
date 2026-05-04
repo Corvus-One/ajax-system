@@ -351,7 +351,7 @@ select.field-input{cursor:pointer;}
 
   <div class="panel-box">
     <div class="field-label"><span class="step-num">2</span>LOCATION & WORK PREFERENCES</div>
-    <div class="field-desc">Select all that apply — agents search for roles matching any checked preference.</div>
+    <div class="field-desc">Select all that apply. Travel: open to unlimited travel including DC area — home base stays in Van Alstyne TX. No DMV relocation.</div>
     <div class="checkbox-grid" id="location-checks">
       <label class="check-item" onclick="toggleCheck(this)">
         <input type="checkbox" value="Local — DFW / Van Alstyne TX (on-site or hybrid)">
@@ -636,7 +636,10 @@ const DEFAULT_SKILLS=[
   {name:'Incident Response',level:'advanced'},
   {name:'Vendor Risk Management',level:'advanced'},
   {name:'Board / Executive Presentations',level:'practitioner'},
-  {name:'Splunk / SIEM Tools',level:'familiar'},
+  {name:'Splunk — SIEM',level:'advanced'},
+  {name:'Microsoft Sentinel — SIEM',level:'advanced'},
+  {name:'eMASS',level:'none'},
+  {name:'ACAS / Tenable',level:'none'},
 ];
 let skills=[...DEFAULT_SKILLS];
 const LEVELS={none:'None / N/A',familiar:'Familiar',practitioner:'Practitioner',advanced:'Advanced',expert:'Expert'};
@@ -751,6 +754,8 @@ MY INFORMATION:
 - Clearance: ${p.clearance} | Willing to obtain/upgrade: ${p.clearWilling?'Yes':'No'}
 - Credentials: ${p.creds}
 - Skills Truth Table: ${p.skills}
+- SIEM Tools (Advanced level — headline skills): Splunk, Microsoft Sentinel
+- Note on SIEM: These are primary differentiators for defense contractor roles. Surface them prominently.
 - Skills I do NOT have: ${p.noSkills}
 - Career Goal: ${p.goal}
 
@@ -769,47 +774,68 @@ Output the master profile in clearly labeled sections. Be dense, specific, and h
   },
   {
     num:'02',name:'Job Scout',
-    tagline:'Mon–Thu · 10–15 qualified roles · scores 7+ only',
+    tagline:'Mon–Thu · defense contractors only · 10–15 qualified roles · scores 7+ only',
     freq:'Run Monday morning',
-    tip:'If fewer than 10 roles score 7+, the agent will explain why and suggest what to relax in the search. Roles requiring skills from your "None" list are flagged automatically.',
+    tip:'Agent 02 uses live web search. After results appear, also paste any job listings you found manually on ClearanceJobs or LinkedIn — Agent 02 will score those too. Defense contractors only — no federal GS roles.',
     isExternal:false,
     inputs:[
-      {id:'a02-notes',label:'ADDITIONAL SEARCH NOTES (optional)',type:'textarea',rows:3,placeholder:'e.g. Focus on remote roles this week. Avoid contract positions. Prioritize Leidos and SAIC. Any specific keywords to add or avoid.'}
+      {id:'a02-notes',label:'ADDITIONAL NOTES OR MANUAL JOB LISTINGS TO SCORE (optional)',type:'textarea',rows:4,placeholder:'Paste any job listings you found manually here and Agent 02 will score them alongside search results. Or add notes: e.g. focus on Leidos this week, avoid contract-only roles.'}
     ],
-    buildPrompt:(ctx,p)=>`You are a job search intelligence agent for a senior cybersecurity professional.
+    buildPrompt:(ctx,p)=>`You are a job search intelligence agent for a senior cybersecurity professional with a critical 18-month hiring window. Speed of hire is the top priority — defense contractors only, no federal GS roles (GS hiring takes 6-9 months, contractor hiring takes 4-8 weeks).
+
+URGENCY CONTEXT:
+This candidate needs to be HIRED within the next few months to hit an 18-month career goal. Every role scored must have realistic 4-8 week hiring timelines. Flag any role known for slow hiring processes.
 
 MY PROFILE:
 - Target Roles: ${p.titles}
-- Location Preferences: ${p.locations}
-- Minimum Salary: ${p.salary}
+- Location: Dallas metro / Van Alstyne TX — open to UNLIMITED travel including DC area — HOME BASE stays in Texas, no relocation to DMV
+- Minimum Salary: ${p.salary} | Target: ${p.salaryT}
 - Clearance: ${p.clearance} | Willing to obtain/upgrade: ${p.clearWilling?'Yes — flag all sponsorship opportunities':'No'}
 - Key Credentials: ${p.creds}
-- Skills I do NOT have (flag if role requires these): ${p.noSkills}
+- SIEM Tools: Splunk (Advanced), Microsoft Sentinel (Advanced)
+- Skills I do NOT have (flag if required): ${p.noSkills}
 - Career Goal: ${p.goal}
-${ctx.a02notes?`\nAdditional notes: ${ctx.a02notes}`:''}
+- LinkedIn Premium: Active — InMail available for direct hiring manager outreach
+
+PRIMARY SEARCH TARGETS (defense contractors only):
+1. Lockheed Martin — careers.lockheedmartin.com
+2. Raytheon / RTX — careers.rtx.com
+3. SAIC — jobs.saic.com
+4. Leidos — leidos.com/careers
+5. Booz Allen Hamilton — boozallen.com/careers
+6. CACI International — caci.com/careers
+7. ManTech — mantech.com/careers
+8. Parsons Corporation — parsons.com/careers
+
+NO FEDERAL GS ROLES. If a USAJobs result appears, skip it.
 
 SEARCH SCHEDULE: Monday through Thursday only.
 
-SEARCH SOURCES:
-1. LinkedIn — my target titles at Lockheed Martin, Raytheon/RTX, SAIC, Leidos, Booz Allen Hamilton
-2. ClearanceJobs.com — CISO, ISSO, Cyber PM, GRC Director (prioritize "clearance preferred" not "required")
-3. USAJobs.gov — GS-13/GS-14 cybersecurity, ISSO, RMF roles
-4. Indeed — CISO, VP Cybersecurity, GRC Director matching my location preferences
-
-SCORING RUBRIC (1–10):
-- Title match: 25% | Clearance preferred over required: 20% | Salary above ${p.salary}: 20%
-- Location match: 15% | Company tier: 10% | NIST/CMMC/RMF alignment: 10%
+SCORING RUBRIC (1-10):
+- Title match to my targets: 25%
+- Clearance: preferred over required scores higher: 20%
+- Salary above ${p.salary}: 20%
+- Location: remote, hybrid, or Dallas + travel friendly: 15%
+- Company tier and hiring speed (contractors score higher than consulting): 10%
+- NIST/CMMC/RMF/SIEM alignment: 10%
 
 HARD RULES:
-- Surface ONLY roles scoring 7 or higher. Target 10–15 results. Do not pad.
-- Flag ⚠️ any role requiring skills from my "do not have" list: ${p.noSkills}
-- If fewer than 10 score 7+, explain why and suggest what to adjust
+- Surface ONLY roles scoring 7 or higher. Target 10-15 results. Do not pad with weak matches.
+- Flag any role requiring eMASS or ACAS as skills gap (candidate does not have these)
+- Flag ⚡ FAST HIRE on any role known for 4-6 week offer timelines
+- Flag 🎯 SPLUNK MATCH on any role listing Splunk or SIEM as a requirement
+- Flag 🎯 SENTINEL MATCH on any role listing Microsoft Sentinel or Azure Sentinel
+- Flag 🔑 CLEARANCE SPONSOR on any role that will sponsor clearance
+- If fewer than 10 roles score 7+, explain why and suggest one specific adjustment
 
-OUTPUT per role: Company | Title | Location | Salary Range | Posted Date | Score | APPLY/WATCHLIST | Clearance Sponsorship? | One-line note
-Sort by score descending.`
+${ctx.a02notes?'MANUAL LISTINGS TO SCORE:\n'+ctx.a02notes:''}
+
+OUTPUT per role:
+Company | Title | Location | Salary | Posted | Score | APPLY/WATCH | Flags (FAST HIRE / SPLUNK / SENTINEL / CLEARANCE SPONSOR) | One-line note
+
+Sort by score descending. End with a LINKEDIN PREMIUM ACTION LIST: 3-5 specific hiring managers at top-scored companies to InMail this week, with suggested message angle for each.`
   },
-  {
-    num:'03',name:'Email Watch',
+  {    num:'03',name:'Email Watch',
     tagline:'Monitors Gmail · organizes inbox · drafts replies from career address',
     freq:'Run every 48 hours',
     tip:'Gmail connector must be active in your Claude chat. Emails from brihan.browne.career@gmail.com auto-forward here — agent scans r321limited@gmail.com and always routes replies back through your career address.',
@@ -890,7 +916,14 @@ MY MASTER PROFILE:
 - Clearance: ${p.clearance} | Willing to obtain: ${p.clearWilling?'Yes':'No'}
 - Career Goal: ${p.goal}
 
-SKILLS TRUTH TABLE:
+HEADLINE SKILLS FOR DEFENSE ROLES (always surface prominently):
+- Splunk: Advanced — operational SIEM, log analysis, threat detection
+- Microsoft Sentinel: Advanced — Azure-native SIEM and SOAR
+- NIST RMF / 800-53: Advanced
+- Incident Response: Advanced
+- Vendor Risk Management: Advanced
+
+FULL SKILLS TRUTH TABLE:
 ${p.skills}
 
 ⚠️ SKILLS I DO NOT HAVE — NEVER include or imply these in any resume output: ${p.noSkills}
@@ -935,6 +968,8 @@ MY PROFILE:
 - Experience: ${p.creds}
 - Target Role: ${ctx.a05company||'[Company]'} — ${ctx.a05role||'[Role]'}
 - Career Goal: ${p.goal}
+- URGENCY: 18-month hard deadline. Actively interviewing now. Need to be hired within weeks not months.
+- SIEM Expertise: Splunk (Advanced), Microsoft Sentinel (Advanced) — lead with these for technical questions
 - Clearance: ${p.clearance} | Willing to obtain: ${p.clearWilling?'Yes':'No'}
 - Salary Floor: ${p.salary} | Target: ${p.salaryT}
 - Skills I do NOT have: ${p.noSkills}
@@ -1236,7 +1271,9 @@ Skills I do NOT have — never imply: ${p.noSkills}
 Company: ${company} | Role: ${role} | Contact: ${document.getElementById('out-contact').value.trim()||'Unknown'}
 Angle: ${document.getElementById('out-angle').value.trim()||'Senior cybersecurity leadership and GRC experience'}
 
-Sound like a confident senior professional. Be specific to ${company}. One version, clean and ready to send. No placeholder brackets.`;
+Sound like a confident senior professional, not a job seeker. Be specific to ${company} — reference their mission, recent work, or known programs.
+${document.getElementById('out-type').value==='linkedin'?'This is a LinkedIn InMail (Premium) — can be slightly longer than a connection note, up to 500 characters. Direct and specific.':''}
+One version, clean and ready to send. No placeholder brackets. Never mention r321limited@gmail.com.`;
 
   document.getElementById('gen-btn').disabled=true;
   document.getElementById('out-loading').classList.add('show');
