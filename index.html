@@ -321,6 +321,7 @@ select.field-input{cursor:pointer;}
 <div class="profile-bar">
   <span class="profile-bar-label">MASTER PROFILE</span>
   <span class="profile-status" id="profile-status">Not saved — complete My Profile tab first</span>
+  <span id="env-indicator" style="font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:4px;margin-left:auto;"></span>
   <button class="clear-profile-btn" onclick="clearMasterProfile()">Clear</button>
 </div>
 
@@ -1066,12 +1067,13 @@ function toggleAgent(i){
 
 // ─── RUN AGENT (API CALL) ─────────────────────────────────
 async function runAgent(i){
-  if(ENV==='local'||ENV==='other'){
-    alert('Agents cannot run from Google Drive or a local file due to browser security restrictions.\n\nSolution: Upload ajax_v3.html to GitHub Pages.\n\nSee the red banner at the top of the page for a direct link to create your repo.');
+  if(ENV==='local'){
+    alert('Agents cannot run from a local file.\n\nOpen your live site: https://corvus-one.github.io/ajax-system/');
     return;
   }
-  if(ENV==='github'&&!getApiKey()){
-    alert('Please enter your Anthropic API key in the yellow banner at the top first.');return;
+  if(ENV==='web'&&!getApiKey()){
+    alert('API key required.\n\nPaste your Anthropic API key (starts with sk-ant-) into the yellow banner at the top of the page, then click Save Key.');
+    return;
   }
   const a=AGENTS[i];
   const p=getMasterProfile()||getProfile();
@@ -1082,6 +1084,7 @@ async function runAgent(i){
   });
 
   const prompt=a.buildPrompt(ctx,p);
+  const useWebSearch=(a.num==='02'); // Job Scout uses web search
   const runBtn=document.getElementById('run-btn-'+i);
   const loading=document.getElementById('loading-'+i);
   const output=document.getElementById('output-'+i);
@@ -1095,19 +1098,38 @@ async function runAgent(i){
   if(saveBtn) saveBtn.classList.remove('show');
 
   try{
-    const data=await callApi(prompt,4000);
+    const data=await callApi(prompt,4000,useWebSearch);
     if(data.error){
       output.textContent='API Error: '+data.error.message+'\n\nType: '+data.error.type;
       return;
     }
-    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-    if(!text){output.textContent='Empty response. Raw:\n'+JSON.stringify(data,null,2);return;}
-    output.textContent=text;
+    if(data.error){
+      output.textContent='API Error: '+data.error.message+'\n\nType: '+data.error.type+'\n\nIf "invalid_api_key" — re-enter key in yellow banner. If "overloaded" — wait 30s and retry.';
+      return;
+    }
+    // Extract text — skip tool_use blocks, combine all text blocks
+    const blocks=data.content||[];
+    const text=blocks.filter(b=>b.type==='text').map(b=>b.text).join('\n');
+    const searchCount=blocks.filter(b=>b.type==='tool_use').length;
+    const resultCount=blocks.filter(b=>b.type==='tool_result').length;
+    const searchNote=searchCount>0?'['+searchCount+' web search'+(searchCount>1?'es':'')+(resultCount>0?' · '+resultCount+' results':'')+' used]\n\n':'';
+    if(!text&&!searchNote){output.textContent='Empty response. Raw:\n'+JSON.stringify(data,null,2);return;}
+    output.textContent=searchNote+text;
     localStorage.setItem('ajax_agent_output_'+a.num,text);
     copyBtn.classList.add('show');
     if(a.saveLabel&&saveBtn) saveBtn.classList.add('show');
   }catch(e){
-    output.textContent='Network error: '+e.message+'\n\nIf you are on Google Drive or a local file, agents cannot run due to browser security (CORS). Upload to GitHub Pages for full functionality — see the red banner at the top for instructions.';
+    let msg='';
+    if(e.message==='Failed to fetch'){
+      msg='Connection error. ';
+      if(ENV==='web')msg+='API key may not be saved for this URL — re-enter it in the yellow banner above. If key is saved, wait 10 seconds and try again.';
+      else if(ENV==='local')msg+='Cannot run from a local file. Open: https://corvus-one.github.io/ajax-system/';
+      else msg+='Check your internet connection and try again.';
+    } else {
+      msg='Error: '+e.message;
+    }
+    msg+=' [ENV:'+ENV+' | Host:'+window.location.hostname+']';
+    output.textContent=msg;
   }finally{
     runBtn.disabled=false;
     loading.classList.remove('show');
@@ -1194,8 +1216,8 @@ function renderPipeline(){
 
 // ─── OUTREACH BUILDER ─────────────────────────────────────
 async function generateOutreach(){
-  if(ENV==='local'||ENV==='other'){alert('Upload to GitHub Pages to use this feature.');return;}
-  if(ENV==='github'&&!getApiKey()){alert('Please enter your API key in the yellow banner first.');return;}
+  if(ENV==='local'){alert('Cannot run from a local file. Open: https://corvus-one.github.io/ajax-system/');return;}
+  if(ENV==='web'&&!getApiKey()){alert('Please enter your API key in the yellow banner first.');return;}
   const company=document.getElementById('out-company').value.trim();
   const role=document.getElementById('out-role').value.trim();
   if(!company||!role){alert('Please enter company and role.');return;}
@@ -1280,16 +1302,24 @@ function copyBool(i){
 
 // ─── ENVIRONMENT DETECTION ────────────────────────────────
 // Mode A: Claude artifact (claude.ai) — API proxied, no key needed
-// Mode B: GitHub Pages (*.github.io) — HTTPS origin, key needed
-// Mode C: Google Drive / local file — blocked by CORS, warn user
+// ENV DETECTION — simplified and robust
+// artifact: running inside Claude.ai (API proxied, no key needed)
+// web: any real HTTPS host (GitHub Pages, etc.) — key needed
+// local: file:// or Google Drive — CORS blocked
 function detectEnv(){
-  const h=window.location.hostname;
-  if(!h||h===''||h==='null')return'local';
-  if(h.includes('claude.ai')||document.referrer.includes('claude.ai'))return'artifact';
-  if(h.includes('github.io'))return'github';
-  return'other';
+  const h=window.location.hostname||'';
+  const proto=window.location.protocol||'';
+  // Claude artifact context
+  if(h.includes('claude.ai'))return'artifact';
+  if(document.referrer&&document.referrer.includes('claude.ai'))return'artifact';
+  // Local file or Google Drive
+  if(proto==='file:'||h===''||h==='null'||h.includes('drive.google'))return'local';
+  // Any real HTTPS host — GitHub Pages, custom domain, etc.
+  if(proto==='https:')return'web';
+  return'local';
 }
 const ENV=detectEnv();
+console.log('[AJAX] Environment detected:',ENV,'| Host:',window.location.hostname,'| Protocol:',window.location.protocol);
 
 // ─── API KEY ──────────────────────────────────────────────
 function getApiKey(){return localStorage.getItem('ajax_api_key')||'';}
@@ -1318,7 +1348,7 @@ function updateApiKeyUI(){
     // Running inside Claude — no key needed, show green bar
     ok.classList.remove('hidden');
     ok.querySelector('span').textContent='✓ Running inside Claude — agents ready, no API key needed';
-  } else if(ENV==='github'){
+  } else if(ENV==='web'){
     // GitHub Pages — check for key
     if(getApiKey()){ok.classList.remove('hidden');}
     else{banner.classList.remove('hidden');}
@@ -1329,7 +1359,6 @@ function updateApiKeyUI(){
 }
 function getHeaders(){
   if(ENV==='artifact'){
-    // Claude artifact — no auth headers needed, API is proxied
     return {'Content-Type':'application/json'};
   }
   return {
@@ -1339,25 +1368,21 @@ function getHeaders(){
     'anthropic-dangerous-direct-browser-access':'true'
   };
 }
-async function callApi(prompt,maxTokens=4000){
-  if(ENV==='artifact'){
-    // Claude artifact mode — standard fetch, proxied automatically
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,
-        messages:[{role:'user',content:prompt}]})
-    });
-    return res.json();
-  } else {
-    // GitHub Pages — send full auth headers
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:getHeaders(),
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,
-        messages:[{role:'user',content:prompt}]})
-    });
-    return res.json();
+async function callApi(prompt,maxTokens=4000,useWebSearch=false){
+  const body={
+    model:'claude-sonnet-4-20250514',
+    max_tokens:maxTokens,
+    messages:[{role:'user',content:prompt}]
+  };
+  if(useWebSearch){
+    body.tools=[{type:'web_search_20250305',name:'web_search'}];
   }
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:getHeaders(),
+    body:JSON.stringify(body)
+  });
+  return res.json();
 }
 
 // ─── UTILS ────────────────────────────────────────────────
@@ -1372,6 +1397,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderPipeline();
   updateProfileBar();
   updateApiKeyUI();
+  // Show environment indicator
+  const envEl=document.getElementById('env-indicator');
+  if(envEl){
+    const envLabels={artifact:'⚡ Claude Artifact',web:'✓ GitHub Pages',local:'⛔ Local / Drive'};
+    const envColors={artifact:'background:var(--green-dim);border:1px solid var(--green);color:var(--green)',web:'background:var(--cyan-dim);border:1px solid var(--border2);color:var(--cyan)',local:'background:var(--red-dim);border:1px solid var(--red);color:var(--red)'};
+    envEl.textContent=envLabels[ENV]||('ENV: '+ENV);
+    envEl.style.cssText=envColors[ENV]||'';
+  }
   document.getElementById('app-date').value=new Date().toISOString().split('T')[0];
 });
 </script>
